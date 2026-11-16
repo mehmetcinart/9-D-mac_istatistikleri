@@ -1725,6 +1725,9 @@
                 <div class="auth-only" onclick="toggleMaintenance();closeUserMenu()" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;transition:background 0.2s;font-size:0.85rem;color:#e67e22" onmouseover="this.style.background='#fff3e0'" onmouseout="this.style.background='none'">
                     <span style="font-size:1.1rem">&#128679;</span> <span id="maintenance-toggle-text">Bakım Arasını Başlat</span>
                 </div>
+                <div class="auth-only" onclick="downloadDatabaseBackup();closeUserMenu()" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;transition:background 0.2s;font-size:0.85rem;color:#333" onmouseover="this.style.background='#f0f7ff'" onmouseout="this.style.background='none'">
+                    <span style="font-size:1.1rem">&#128190;</span> Veritabanı Yedeğini İndir
+                </div>
                 <div id="mode-toggle-item" style="display:none">
                     <div onclick="toggleViewMode()" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;transition:background 0.2s;font-size:0.85rem;color:#e67e22" onmouseover="this.style.background='#fff3e0'" onmouseout="this.style.background='none'">
                         <span style="font-size:1.1rem" id="mode-toggle-icon">&#128065;</span> <span id="mode-toggle-text">Gözlemci Moduna Geç</span>
@@ -1793,6 +1796,17 @@
         <div class="modal-body" id="admin-modal-body">
             <div style="text-align:center;color:#aaa;padding:20px">Yükleniyor...</div>
         </div>
+    </div>
+</div>
+
+<!-- VERİTABANI YEDEK MODAL -->
+<div class="modal-overlay" id="backup-modal">
+    <div class="modal" style="max-width:450px">
+        <div class="modal-header" style="background:linear-gradient(135deg,#1E90FF,#0052a3)">
+            <h2>Veritabanı Yedeği</h2>
+            <button class="modal-close" onclick="document.getElementById('backup-modal').classList.remove('show')">&times;</button>
+        </div>
+        <div class="modal-body" id="backup-modal-body"></div>
     </div>
 </div>
 
@@ -5670,6 +5684,82 @@
         db.ref('9d_maintenance').set(maintenanceMode ? { active: true, since: new Date().toISOString() } : null).then(() => {
             notify(maintenanceMode ? 'Bakım arasındadır!' : 'Bakım arası bitti!');
             updateMaintenanceUI();
+        });
+    }
+
+    // ===== VERİTABANI YEDEĞİ (sadece okur, hiçbir şey yazmaz) =====
+    const BACKUP_KEYS = ['9d_matches', '9d_polls', '9d_notifications', '9d_notifs_cleared', '9d_feedbacks',
+        '9d_pending_edits', '9d_player_edits', '9d_users', '9d_user_links', '9d_maintenance'];
+    let backupInProgress = false;
+
+    function downloadDatabaseBackup() {
+        const user = auth.currentUser;
+        if (!user || !isControlMode()) { notify('Bu işlem için yetkiniz yok!', true); return; }
+        if (backupInProgress) return;
+
+        // Rolü veritabanından tekrar doğrula
+        getUserRole(user.uid, role => {
+            if (role !== 'admin') { notify('Bu işlem için yetkiniz yok!', true); return; }
+            backupInProgress = true;
+
+            const body = document.getElementById('backup-modal-body');
+            body.innerHTML = '<div style="text-align:center;color:#aaa;padding:20px">Yedek alınıyor...</div>';
+            document.getElementById('backup-modal').classList.add('show');
+
+            const finish = (data, failedKeys, source) => {
+                const now = new Date();
+                const p = n => String(n).padStart(2, '0');
+                const fileName = 'yedek-' + now.getFullYear() + '-' + p(now.getMonth() + 1) + '-' + p(now.getDate()) +
+                    '-' + p(now.getHours()) + p(now.getMinutes()) + '.json';
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+                const count = v => (v && typeof v === 'object') ? Object.keys(v).length : 0;
+                const row = (label, n) => '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee"><span>' + label + '</span><strong>' + n + '</strong></div>';
+                let html = '<div style="font-size:0.85rem">' +
+                    '<p style="margin-bottom:10px">&#9989; <strong>' + fileName + '</strong> indirildi.</p>' +
+                    '<p style="margin-bottom:10px;color:#888;font-size:0.75rem">Okuma yöntemi: ' + (source === 'root' ? 'Kök (tüm veritabanı)' : 'Anahtar anahtar') + '</p>' +
+                    row('Maç', count(data['9d_matches'])) +
+                    row('Anket', count(data['9d_polls'])) +
+                    row('Duyuru', count(data['9d_notifications'])) +
+                    row('Kullanıcı', count(data['9d_users']));
+                if (failedKeys.length) {
+                    html += '<div style="margin-top:12px;color:#e74c3c"><strong style="color:#e74c3c !important">Okunamayan anahtarlar:</strong><ul style="margin:6px 0 0 18px">' +
+                        failedKeys.map(f => '<li style="color:#e74c3c">' + f.key + ' — ' + f.error + '</li>').join('') + '</ul></div>';
+                }
+                html += '</div>';
+                body.innerHTML = html;
+                backupInProgress = false;
+            };
+
+            const readKeysOneByOne = () => {
+                Promise.allSettled(BACKUP_KEYS.map(k => db.ref(k).once('value'))).then(results => {
+                    const data = {};
+                    const failed = [];
+                    results.forEach((r, i) => {
+                        if (r.status === 'fulfilled') {
+                            const v = r.value.val();
+                            if (v !== null) data[BACKUP_KEYS[i]] = v;
+                        } else {
+                            failed.push({ key: BACKUP_KEYS[i], error: (r.reason && (r.reason.code || r.reason.message)) || 'Bilinmeyen hata' });
+                        }
+                    });
+                    finish(data, failed, 'keys');
+                });
+            };
+
+            db.ref('/').once('value').then(snap => {
+                finish(snap.val() || {}, [], 'root');
+            }).catch(() => {
+                readKeysOneByOne();
+            });
         });
     }
 
