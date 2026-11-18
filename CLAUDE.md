@@ -3,8 +3,8 @@
 ## Proje Özeti
 9-D sınıfı beden eğitimi derslerindeki futbol maçlarını, oyuncu istatistiklerini ve kadro dengeleme sistemini yöneten tek sayfalık (SPA) bir web uygulaması.
 
-**Canlı Site:** https://mehmet-cinart.github.io/9-D-mac_istatistikleri/9dbedenistatistikler.html
-**GitHub:** https://github.com/Mehmet-CinarT/9-D-mac_istatistikleri
+**Canlı Site:** https://mehmetcinart.github.io/9-D-mac_istatistikleri/9dbedenistatistikler.html
+**GitHub:** https://github.com/mehmetcinart/9-D-mac_istatistikleri
 **Renk Şeması:** Beyaz (#FFFFFF) + Mavi (#1E90FF)
 
 ---
@@ -313,5 +313,5 @@ Değişiklik yapıldığında şu adımlar izlenir:
 2. Türkçe ve açıklayıcı bir commit mesajı yazılır
 3. `git push origin main` ile GitHub'a gönderilir
 
-Remote URL: `https://github.com/Mehmet-CinarT/9-D-mac_istatistikleri.git`
+Remote URL: `https://github.com/mehmetcinart/9-D-mac_istatistikleri.git`
 Branch: `main`
