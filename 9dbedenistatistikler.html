@@ -1531,6 +1531,73 @@
         body.admin-mode button.auth-only { display: inline-block !important; }
         body.admin-mode .match-card .auth-only { display: flex !important; }
 
+        /* ===== SEZON SİSTEMİ ===== */
+        /* Sezon moduna özel / geçiş (eski yapı) moduna özel öğeler */
+        body:not(.season-mode) .season-mode-only,
+        body.admin-mode:not(.season-mode) .season-mode-only { display: none !important; }
+        /* Geçmiş sezon görüntülenirken gizlenecek formlar */
+        body.past-season .season-current-only,
+        body.admin-mode.past-season .season-current-only { display: none !important; }
+        .season-past-banner {
+            display: none;
+            margin-bottom: 16px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            background: #fff3e0;
+            border: 2px solid #ffe0b2;
+            color: #e67e22;
+            font-size: 0.85rem;
+            font-weight: 600;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        body.past-season .season-past-banner { display: flex; }
+        .season-past-banner button {
+            margin-left: auto;
+            padding: 6px 14px;
+            border: none;
+            border-radius: 8px;
+            background: #e67e22;
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+        body.dark-mode .season-past-banner { background: #2a2116; border-color: #5c4320; color: #f0a35e; }
+        .season-select {
+            padding: 7px 14px;
+            border: 2px solid #1E90FF;
+            border-radius: 20px;
+            background: #fff;
+            color: #1E90FF;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            max-width: 100%;
+            outline: none;
+        }
+        .season-select:hover { background: #f0f7ff; }
+        .season-select option { color: #333; background: #fff; }
+        body.dark-mode .season-select { background: #1a2233; color: #6cb6ff; border-color: #1E90FF; }
+        body.dark-mode .season-select option { color: #f0f0f0; background: #1a2233; }
+        .season-form-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            background: var(--card-bg);
+            color: var(--text);
+        }
+        .season-form-label {
+            display: block;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+        }
+
         .user-bar {
             background: var(--glass-bg);
             backdrop-filter: blur(10px);
@@ -1611,7 +1678,7 @@
 <!-- LOADING SCREEN -->
 <div id="loading-screen" style="position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#1E90FF,#0052a3);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px">
     <img src="Logo.png" alt="Logo" style="width:60px;height:60px;border-radius:50%;border:3px solid rgba(255,255,255,0.3)">
-    <div style="font-size:1.5rem;font-weight:700;color:#fff">9/D Maçlar ve İstatistikler</div>
+    <div style="font-size:1.5rem;font-weight:700;color:#fff"><span class="class-label">9/D</span> Maçlar ve İstatistikler</div>
     <div style="font-size:0.9rem;color:rgba(255,255,255,0.7)">Yükleniyor...</div>
 </div>
 
@@ -1619,7 +1686,7 @@
 <div class="login-overlay" id="login-screen" style="display:none">
     <div class="login-box">
         <img src="Logo.png" alt="Logo" style="width:70px;height:70px;border-radius:50%;margin-bottom:12px">
-        <h1>9/D Maçlar ve İstatistikler</h1>
+        <h1><span class="class-label">9/D</span> Maçlar ve İstatistikler</h1>
         <p id="auth-subtitle">Giriş yapın veya kayıt olun</p>
 
         <div class="auth-error" id="auth-error"></div>
@@ -1673,7 +1740,7 @@
     <div style="display:flex;align-items:center;justify-content:center;gap:12px">
         <img src="Logo.png" alt="Logo" style="width:42px;height:42px;border-radius:50%;border:2px solid rgba(255,255,255,0.3)">
         <div>
-            <h1>9/D Maçlar ve İstatistikler</h1>
+            <h1><span class="class-label">9/D</span> Maçlar ve İstatistikler</h1>
             <p>Maçlar, Oyuncular ve Kadro Sistemi</p>
         </div>
     </div>
@@ -1681,7 +1748,9 @@
 
 <!-- USER BAR -->
 <div class="user-bar" id="user-bar" style="display:none">
-    <div style="flex:1"></div>
+    <div style="flex:1;display:flex;align-items:center">
+        <select id="season-select" class="season-select" onchange="onSeasonSelect(this.value)" style="display:none" title="Sezon seç"></select>
+    </div>
     <div style="position:relative">
         <div onclick="toggleUserMenu()" style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:4px 8px;border-radius:10px;transition:background 0.2s" onmouseover="this.style.background='rgba(30,144,255,0.08)'" onmouseout="this.style.background='none'">
             <div class="user-info">
@@ -1727,6 +1796,12 @@
                 </div>
                 <div class="auth-only" onclick="downloadDatabaseBackup();closeUserMenu()" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;transition:background 0.2s;font-size:0.85rem;color:#333" onmouseover="this.style.background='#f0f7ff'" onmouseout="this.style.background='none'">
                     <span style="font-size:1.1rem">&#128190;</span> Veritabanı Yedeğini İndir
+                </div>
+                <div class="auth-only" onclick="openRestoreModal();closeUserMenu()" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;transition:background 0.2s;font-size:0.85rem;color:#333" onmouseover="this.style.background='#f0f7ff'" onmouseout="this.style.background='none'">
+                    <span style="font-size:1.1rem">&#128228;</span> Yedekten Geri Yükle
+                </div>
+                <div class="auth-only" onclick="openSeasonsPanel();closeUserMenu()" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;transition:background 0.2s;font-size:0.85rem;color:#333" onmouseover="this.style.background='#f0f7ff'" onmouseout="this.style.background='none'">
+                    <span style="font-size:1.1rem">&#128197;</span> Sezonlar
                 </div>
                 <div id="mode-toggle-item" style="display:none">
                     <div onclick="toggleViewMode()" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;transition:background 0.2s;font-size:0.85rem;color:#e67e22" onmouseover="this.style.background='#fff3e0'" onmouseout="this.style.background='none'">
@@ -1810,6 +1885,17 @@
     </div>
 </div>
 
+<!-- SEZON YÖNETİMİ MODAL (yeni sezon, taşıma, geri yükleme, oyuncu ekleme) -->
+<div class="modal-overlay" id="season-admin-modal">
+    <div class="modal" style="max-width:520px">
+        <div class="modal-header" style="background:linear-gradient(135deg,#1E90FF,#0052a3)">
+            <h2 id="season-admin-title">Sezon</h2>
+            <button class="modal-close" onclick="closeSeasonAdminModal()">&times;</button>
+        </div>
+        <div class="modal-body" id="season-admin-body"></div>
+    </div>
+</div>
+
 <!-- NAV TABS -->
 <div class="nav-tabs">
     <button class="active" onclick="switchTab('anasayfa')">Ana Sayfa</button>
@@ -1856,9 +1942,11 @@
         <div class="table-wrapper">
             <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:4px">
                 <h2 style="margin:0">Tüm Oyuncular</h2>
-                <button class="btn btn-secondary control-only" onclick="exportPlayersToExcel()" style="margin-left:auto">Excel Olarak İndir</button>
+                <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
+                    <button class="btn btn-secondary auth-only season-mode-only" onclick="openAddPlayerModal()">+ Oyuncu Ekle</button>
+                    <button class="btn btn-secondary control-only" onclick="exportPlayersToExcel()">Excel Olarak İndir</button>
+                </div>
             </div>
-            <div id="players-filter-bar"></div>
             <table style="margin-bottom:0">
                 <thead>
                     <tr>
@@ -1880,24 +1968,17 @@
 
     <!-- ===== MACLAR ===== -->
     <div id="tab-maclar" class="tab-content">
-        <div class="form-section auth-only">
+        <div class="season-past-banner" data-ctx="mac"></div>
+        <div class="form-section auth-only season-current-only">
             <h2>Yeni Maç Ekle</h2>
             <input type="hidden" id="match-team1" value="Takım A">
             <input type="hidden" id="match-team2" value="Takım B">
 
             <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
                 <div style="flex:1;min-width:120px">
-                    <label style="display:block;font-weight:600;color:#555;margin-bottom:6px;font-size:0.85rem">Yer</label>
-                    <select id="match-location" style="width:100%;padding:12px 14px;border:2px solid #e0e0e0;border-radius:10px;font-size:0.9rem">
-                        <option value="Okul">Okul</option>
-                        <option value="Halısaha">Halısaha</option>
-                    </select>
-                </div>
-                <div style="flex:1;min-width:120px">
                     <label style="display:block;font-weight:600;color:#555;margin-bottom:6px;font-size:0.85rem">Tür</label>
                     <select id="match-type" onchange="onMatchTypeChange()" style="width:100%;padding:12px 14px;border:2px solid #e0e0e0;border-radius:10px;font-size:0.9rem">
                         <option value="Dostluk">Dostluk Maçı</option>
-                        <option value="Lig">Lig Maçı</option>
                         <option value="Turnuva">Turnuva Maçı</option>
                     </select>
                 </div>
@@ -1945,8 +2026,8 @@
                 </div>
             </div>
 
-            <div id="extra-panel" style="display:none;margin-bottom:16px;padding:14px;background:#f0f7ff;border:2px solid #d0e4ff;border-radius:10px">
-                <label style="display:block;font-weight:600;color:#1E90FF;margin-bottom:8px;font-size:0.85rem">Ekstra Oyuncu</label>
+            <div id="extra-panel" style="margin-bottom:16px;padding:14px;background:#f0f7ff;border:2px solid #d0e4ff;border-radius:10px">
+                <label style="display:block;font-weight:600;color:#1E90FF;margin-bottom:8px;font-size:0.85rem">Misafir Oyuncu</label>
                 <p id="extra-panel-info" style="font-size:0.8rem;color:#777;margin-bottom:8px"></p>
                 <div id="extra-match-players"></div>
                 <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
@@ -1965,7 +2046,7 @@
                         <option value="1">Takım A</option>
                         <option value="2">Takım B</option>
                     </select>
-                    <button class="btn btn-secondary" onclick="addExtraMatchPlayer()" style="padding:10px 14px">Ekle</button>
+                    <button class="btn btn-secondary" onclick="addExtraMatchPlayer()" style="padding:10px 14px">Misafir Ekle</button>
                 </div>
             </div>
 
@@ -2005,7 +2086,6 @@
 
     <!-- ===== GOL & ASIST KRALLIGI ===== -->
     <div id="tab-krallik" class="tab-content">
-        <div id="kings-container"></div>
         <div class="kings-grid" id="kings-grid"></div>
     </div>
 
@@ -2034,8 +2114,9 @@
 
     <!-- ===== DUYURULAR ===== -->
     <div id="tab-duyurular" class="tab-content">
+        <div class="season-past-banner" data-ctx="duyuru"></div>
         <!-- Duyuru Oluşturma (sadece kontrolcü) -->
-        <div class="form-section auth-only" style="border-top:4px solid #e74c3c">
+        <div class="form-section auth-only season-current-only" style="border-top:4px solid #e74c3c">
             <h2 style="color:#e74c3c">Yeni Duyuru Oluştur</h2>
             <div style="margin-bottom:12px">
                 <label style="display:block;font-weight:600;color:var(--text-secondary);margin-bottom:6px;font-size:0.85rem">Duyuru Başlığı</label>
@@ -2059,8 +2140,9 @@
 
     <!-- ===== ANKETLER ===== -->
     <div id="tab-anketler" class="tab-content">
+        <div class="season-past-banner" data-ctx="anket"></div>
         <!-- Anket Oluşturma (sadece kontrolcü) -->
-        <div class="form-section auth-only" style="border-top:4px solid #9b59b6">
+        <div class="form-section auth-only season-current-only" style="border-top:4px solid #9b59b6">
             <h2 style="color:#9b59b6">Yeni Anket Oluştur</h2>
 
             <!-- Anket Türü -->
@@ -2156,12 +2238,12 @@
         <!-- Hakkında -->
         <div>
             <h3 style="font-size:1rem;margin-bottom:12px;color:#1E90FF">Hakkında</h3>
-            <p style="font-size:0.8rem;color:#999;line-height:1.6">9/D sınıfının futbol maçlarını ve oyuncu istatistiklerini takip eden web uygulaması.</p>
+            <p style="font-size:0.8rem;color:#999;line-height:1.6"><span class="class-label">9/D</span> sınıfının futbol maçlarını ve oyuncu istatistiklerini takip eden web uygulaması.</p>
         </div>
     </div>
 
     <div style="text-align:center;margin-top:24px;padding-top:16px;border-top:1px solid #333;font-size:0.75rem;color:#666">
-        &copy; 2026 9/D Maçlar ve İstatistikler. Tüm hakları saklıdır.
+        &copy; 2026 <span class="class-label">9/D</span> Maçlar ve İstatistikler. Tüm hakları saklıdır.
     </div>
 </footer>
 
@@ -2250,30 +2332,304 @@
     let playersShown = 12, matchesShown = 3, duyurularShown = 12, pollsShown = 12;
     let matches = [];
 
-    // Oyuncu bilgilerini Firebase'den güncelle (mevki, ayak değişiklikleri)
-    db.ref('9d_player_edits').on('value', snap => {
-        const edits = snap.val() || {};
-        players = defaultPlayers.map(dp => {
+    // ===== SEZON SİSTEMİ =====
+    // Veri yapısı:
+    //   seasons_meta: { current, list: { [sezonId]: {name, grade, label, order, startDate} }, migration }
+    //   seasons/{sezonId}: { players, player_edits, pending_edits, settings, matches,
+    //                        notifications, notifs_cleared, announcements, polls }
+    // seasons_meta yoksa "geçiş modu": site eski 9d_* anahtarlarını tek sezon gibi okur.
+    let legacyMode = true;          // sezon sistemine geçilene kadar true
+    let seasonsMeta = null;         // seasons_meta değeri
+    let allSeasons = {};            // seasons değeri (bütün sezonlar bellekte)
+    let seasonsLoaded = false;
+    let currentSeasonId = null;     // en son sezon (maçlar buraya eklenir)
+    let viewSeasonId = null;        // görüntülenen sezon
+    let legacyMatches = [];
+    let legacyEdits = {};
+    let lastViewSignature = '';
+    let lastMvpSignature = '';
+    let modeReadyResolve;
+    const modeReady = new Promise(r => { modeReadyResolve = r; });
+
+    // Firebase dizi veya obje döndürebilir; boşları ayıklayıp listeye çevir
+    function toList(v) {
+        if (!v) return [];
+        return (Array.isArray(v) ? v : Object.values(v)).filter(Boolean);
+    }
+
+    // Veritabanı yolları: görüntülenen sezon (sPath) ve güncel sezon (cPath)
+    function sPath(key, sid) {
+        if (legacyMode) return '9d_' + key;
+        return 'seasons/' + (sid || viewSeasonId) + '/' + key;
+    }
+    function cPath(key) { return sPath(key, currentSeasonId); }
+
+    function getSeasonIds() {
+        if (legacyMode || !seasonsMeta || !seasonsMeta.list) return [];
+        return Object.keys(seasonsMeta.list)
+            .filter(id => !id.startsWith('_'))
+            .sort((a, b) => ((seasonsMeta.list[a].order || 0) - (seasonsMeta.list[b].order || 0)) || a.localeCompare(b));
+    }
+    function seasonInfo(sid) { return (seasonsMeta && seasonsMeta.list && seasonsMeta.list[sid]) || null; }
+    function seasonClassLabel(sid) { const s = seasonInfo(sid); return s ? (s.label || (s.grade + '/D')) : '9/D'; }
+    function seasonShortName(sid) { const s = seasonInfo(sid); return s ? s.grade + '. Sınıf' : sid; }
+    function seasonDisplayName(sid) { const s = seasonInfo(sid); return s ? s.grade + '. Sınıf (' + (s.name || sid) + ')' : sid; }
+    function isPastSeasonView() { return !legacyMode && !!viewSeasonId && viewSeasonId !== currentSeasonId; }
+
+    // Temel oyuncu listesine sezonun düzenlemelerini (mevki, ayak) uygula
+    function buildRoster(baseList, edits) {
+        edits = edits || {};
+        return baseList.map(dp => {
+            const base = { id: dp.id, name: dp.name, positions: dp.positions || [], primaryPos: dp.primaryPos, foot: dp.foot || 'Sağ', goals: 0, assists: 0, matches: 0 };
             const edit = edits[dp.id];
             if (edit) {
-                return { ...dp, positions: sortPositions(edit.positions || dp.positions), primaryPos: edit.primaryPos || dp.primaryPos, foot: edit.foot || dp.foot };
+                return { ...base, positions: sortPositions(edit.positions || base.positions), primaryPos: edit.primaryPos || base.primaryPos, foot: edit.foot || base.foot };
             }
-            return { ...dp };
-        });
-        recalcPlayerStats();
-        renderAll();
-    });
-
-    // Firebase'den verileri dinle - anlık güncelleme
-    db.ref('9d_matches').on('value', (snapshot) => {
-        matches = snapshot.val() || [];
-        recalcPlayerStats();
-        renderAll();
-        // Anketler sekmesi açıksa MVP maç listesini güncelle
-        if (document.getElementById('tab-anketler').classList.contains('active') && pollType === 'mvp') {
-            loadMvpMatchOptions();
+            return base;
+        }).sort((a, b) => a.id - b.id);
+    }
+    function seasonRoster(sid) {
+        if (legacyMode || !sid) return players;
+        if (sid === viewSeasonId) return players;
+        const s = allSeasons[sid] || {};
+        return buildRoster(toList(s.players), s.player_edits);
+    }
+    function seasonMatches(sid) {
+        if (legacyMode || !sid) return matches;
+        if (sid === viewSeasonId) return matches;
+        return toList((allSeasons[sid] || {}).matches);
+    }
+    function seasonSettings(sid) {
+        if (legacyMode) return {};
+        return ((allSeasons[sid || currentSeasonId] || {}).settings) || {};
+    }
+    // Kadro kurucu her zaman güncel sezonun kadrosunu kullanır
+    function getBuilderRoster() { return legacyMode ? players : seasonRoster(currentSeasonId); }
+    function findPlayerAnySeason(id) {
+        const p = players.find(x => x.id === id);
+        if (p) return p;
+        const ids = getSeasonIds().slice().reverse();
+        for (const sid of ids) {
+            const q = seasonRoster(sid).find(x => x.id === id);
+            if (q) return q;
         }
-    });
+        return null;
+    }
+    function findMatchAnySeason(matchId) {
+        const m = matches.find(x => x.id === matchId);
+        if (m) return { m, sid: viewSeasonId };
+        for (const sid of getSeasonIds()) {
+            const f = seasonMatches(sid).find(x => x.id === matchId);
+            if (f) return { m: f, sid };
+        }
+        return null;
+    }
+    // Başka sezonun maçını gösterirken isimler o sezonun kadrosundan gelsin
+    function withSeasonRoster(sid, fn) {
+        if (legacyMode || !sid || sid === viewSeasonId) return fn();
+        const saved = players;
+        players = seasonRoster(sid);
+        try { return fn(); } finally { players = saved; }
+    }
+
+    // Görüntülenen sezonun verisini global players/matches değişkenlerine yükle
+    function applyViewSeason() {
+        if (legacyMode) {
+            players = buildRoster(defaultPlayers, legacyEdits);
+            matches = legacyMatches.slice();
+        } else {
+            const s = allSeasons[viewSeasonId] || {};
+            players = buildRoster(toList(s.players), s.player_edits);
+            matches = toList(s.matches);
+        }
+        document.body.classList.toggle('past-season', isPastSeasonView());
+        document.body.classList.toggle('season-mode', !legacyMode);
+    }
+
+    // Geçmiş sezona yazma koruması: normal kullanıcı engellenir, admin onay verir
+    const pastEditConfirmed = {};
+    function guardSeasonWrite() {
+        if (!isPastSeasonView()) return true;
+        if (!isControlMode()) { notify('Geçmiş sezonlarda değişiklik yapılamaz.', true); return false; }
+        if (pastEditConfirmed[viewSeasonId]) return true;
+        if (!confirm('Geçmiş sezonu düzenliyorsunuz: ' + seasonDisplayName(viewSeasonId) + '.\nBu değişiklik o sezonun istatistiklerini etkiler. Devam edilsin mi?')) return false;
+        pastEditConfirmed[viewSeasonId] = true;
+        return true;
+    }
+
+    // ----- Sezon arayüzü -----
+    function readCachedLabel() {
+        try { return localStorage.getItem('9d_class_label') || '9/D'; } catch (e) { return '9/D'; }
+    }
+    function updateClassLabels() {
+        const label = legacyMode ? readCachedLabel() : seasonClassLabel(viewSeasonId);
+        document.querySelectorAll('.class-label').forEach(el => { el.textContent = label; });
+        document.title = label + ' Maçlar ve İstatistikler';
+        if (!legacyMode && currentSeasonId) {
+            try { localStorage.setItem('9d_class_label', seasonClassLabel(currentSeasonId)); } catch (e) {}
+        }
+    }
+    function renderSeasonSelector() {
+        const sel = document.getElementById('season-select');
+        const ids = getSeasonIds();
+        if (legacyMode || ids.length === 0) { sel.style.display = 'none'; return; }
+        sel.innerHTML = ids.slice().reverse().map(id =>
+            '<option value="' + id + '"' + (id === viewSeasonId ? ' selected' : '') + '>' + esc(seasonDisplayName(id)) + (id === currentSeasonId ? ' • Güncel' : '') + '</option>'
+        ).join('');
+        sel.style.display = '';
+    }
+    function updateSeasonBanners() {
+        const name = viewSeasonId ? seasonDisplayName(viewSeasonId) : '';
+        const texts = {
+            mac: 'Şu an ' + name + ' sezonunu görüntülüyorsunuz. Yeni maçlar her zaman güncel sezona eklenir.',
+            duyuru: 'Şu an ' + name + ' sezonunun duyurularını görüntülüyorsunuz.',
+            anket: 'Şu an ' + name + ' sezonunun anketlerini görüntülüyorsunuz. Geçmiş sezon anketlerine oy verilemez.'
+        };
+        document.querySelectorAll('.season-past-banner').forEach(el => {
+            el.innerHTML = '<span>&#128197; ' + esc(texts[el.dataset.ctx] || texts.mac) + '</span><button onclick="onSeasonSelect(currentSeasonId)">Güncel sezona geç</button>';
+        });
+    }
+    function renderSeasonUI() {
+        renderSeasonSelector();
+        updateClassLabels();
+        updateSeasonBanners();
+    }
+    function refreshActiveTabs() {
+        if (document.getElementById('tab-anketler').classList.contains('active')) renderPolls();
+        if (document.getElementById('tab-duyurular').classList.contains('active')) renderDuyurular();
+        if (document.getElementById('tab-performansim').classList.contains('active')) renderPerformansim();
+    }
+    function onSeasonSelect(sid) {
+        if (legacyMode || !seasonInfo(sid)) return;
+        viewSeasonId = sid;
+        matchesShown = 3; playersShown = 12; duyurularShown = 12; pollsShown = 12;
+        perfSeasonSel = null;
+        applyViewSeason();
+        lastViewSignature = viewSignature();
+        renderSeasonUI();
+        renderAll();
+        refreshActiveTabs();
+    }
+
+    // ----- Veri dinleyicileri -----
+    function viewSignature() {
+        if (legacyMode) return '';
+        const s = allSeasons[viewSeasonId] || {};
+        return JSON.stringify([viewSeasonId, s.matches || null, s.players || null, s.player_edits || null]);
+    }
+    function mvpSignature() {
+        const ms = legacyMode ? legacyMatches : toList((allSeasons[currentSeasonId] || {}).matches);
+        return JSON.stringify(ms.map(m => [m.id, !!m.pending]));
+    }
+    function refreshMvpIfNeeded() {
+        const sig = mvpSignature();
+        if (sig === lastMvpSignature) return;
+        lastMvpSignature = sig;
+        if (document.getElementById('tab-anketler').classList.contains('active') && pollType === 'mvp') loadMvpMatchOptions();
+    }
+
+    const legacyHandlers = { on: false };
+    function attachLegacyListeners() {
+        if (legacyHandlers.on) return;
+        legacyHandlers.on = true;
+        const onErr = err => { console.warn('Veri okunamadı (eski yapı):', err && err.code); legacyHandlers.on = false; };
+        legacyHandlers.edits = db.ref('9d_player_edits').on('value', snap => {
+            legacyEdits = snap.val() || {};
+            if (legacyMode) { applyViewSeason(); renderAll(); }
+        }, onErr);
+        legacyHandlers.matches = db.ref('9d_matches').on('value', snap => {
+            legacyMatches = toList(snap.val());
+            if (legacyMode) { applyViewSeason(); renderAll(); refreshMvpIfNeeded(); }
+        }, onErr);
+        legacyHandlers.notifs = db.ref('9d_notifications').on('value', snap => {
+            if (legacyMode) onCurrentNotifsChanged(snap.val());
+        }, onErr);
+        legacyHandlers.pending = db.ref('9d_pending_edits').on('value', () => {
+            if (legacyMode) updatePendingEditsBadge();
+        }, onErr);
+    }
+    function detachLegacyListeners() {
+        if (!legacyHandlers.on) return;
+        db.ref('9d_player_edits').off('value', legacyHandlers.edits);
+        db.ref('9d_matches').off('value', legacyHandlers.matches);
+        db.ref('9d_notifications').off('value', legacyHandlers.notifs);
+        db.ref('9d_pending_edits').off('value', legacyHandlers.pending);
+        legacyHandlers.on = false;
+    }
+
+    let seasonsHandler = null;
+    function attachSeasonsListener() {
+        if (seasonsHandler) return;
+        seasonsHandler = db.ref('seasons').on('value', snap => {
+            allSeasons = snap.val() || {};
+            seasonsLoaded = true;
+            if (!legacyMode) onSeasonDataChanged();
+        }, err => { console.warn('Sezon verisi okunamadı:', err && err.code); seasonsHandler = null; });
+    }
+
+    function onSeasonDataChanged() {
+        if (!seasonsLoaded) return;
+        const sig = viewSignature();
+        if (sig !== lastViewSignature) {
+            lastViewSignature = sig;
+            applyViewSeason();
+            renderAll();
+            if (document.getElementById('tab-performansim').classList.contains('active')) renderPerformansim();
+        }
+        refreshMvpIfNeeded();
+        if (document.getElementById('tab-anketler').classList.contains('active')) renderPolls();
+        if (document.getElementById('tab-duyurular').classList.contains('active')) renderDuyurular();
+        onCurrentNotifsChanged((allSeasons[currentSeasonId] || {}).notifications || null);
+        updatePendingEditsBadge();
+    }
+
+    function enterLegacyMode() {
+        const wasSeason = !legacyMode;
+        legacyMode = true;
+        seasonsMeta = null;
+        currentSeasonId = null;
+        viewSeasonId = null;
+        if (seasonsHandler) { db.ref('seasons').off('value', seasonsHandler); seasonsHandler = null; }
+        if (wasSeason) { notifInitialized = false; lastViewSignature = ''; }
+        attachLegacyListeners();
+        applyViewSeason();
+        renderSeasonUI();
+        renderAll();
+    }
+    function enterSeasonMode(meta) {
+        const wasLegacy = legacyMode;
+        const prevCurrent = currentSeasonId;
+        legacyMode = false;
+        seasonsMeta = meta;
+        currentSeasonId = meta.current;
+        // Güncel sezonu izleyen cihaz yeni güncel sezona geçer; silinen sezon görüntüleniyorsa da güncel sezona dönülür
+        if (!viewSeasonId || !seasonInfo(viewSeasonId) || viewSeasonId === prevCurrent) viewSeasonId = currentSeasonId;
+        if (wasLegacy) { detachLegacyListeners(); notifInitialized = false; lastViewSignature = ''; lastMvpSignature = ''; }
+        attachSeasonsListener();
+        renderSeasonUI();
+        if (seasonsLoaded) { lastViewSignature = ''; onSeasonDataChanged(); }
+        else applyViewSeason();
+    }
+
+    let metaListenerOn = false;
+    function startDataListeners() {
+        if (!metaListenerOn) {
+            metaListenerOn = true;
+            db.ref('seasons_meta').on('value', snap => {
+                const meta = snap.val();
+                if (meta && meta.current && meta.list && meta.list[meta.current]) enterSeasonMode(meta);
+                else if (!legacyMode || !legacyHandlers.on) enterLegacyMode();
+                modeReadyResolve();
+            }, err => {
+                // Kurallar seasons_meta okumasına izin vermiyorsa eski yapıyla devam et
+                console.warn('seasons_meta okunamadı:', err && err.code);
+                metaListenerOn = false;
+                if (legacyMode) attachLegacyListeners();
+                modeReadyResolve();
+            });
+        }
+        if (legacyMode) attachLegacyListeners();
+    }
 
     // ===== NOTIFICATION =====
     // Kısa isim: ilk adı aynı olanlar İlk Harf + 2. isim, diğerleri sadece ilk isim
@@ -2360,32 +2716,25 @@
     function recalcPlayerStats() {
         players.forEach(p => {
             p.goals = 0; p.assists = 0; p.matches = 0; p.gaMatches = 0; p.conceded = 0; p.gkMatches = 0;
-            p.haliGoals = 0; p.haliAssists = 0; p.haliMatches = 0; p.haliGaMatches = 0; p.haliConceded = 0; p.haliGkMatches = 0;
         });
         matches.forEach(m => {
             if (m.pending) return;
-            const isHali = m.location === 'Halısaha';
             const isZeroZero = m.score1 === 0 && m.score2 === 0;
             const hasEvents = (m.events && m.events.length > 0) || isZeroZero;
             const allPlayerIds = [...(m.team1Players || []), ...(m.team2Players || [])];
             allPlayerIds.forEach(pid => {
                 const p = players.find(x => x.id === pid);
                 if (p) {
-                    if (isHali) { p.haliMatches++; if (hasEvents) p.haliGaMatches++; }
-                    else { p.matches++; if (hasEvents) p.gaMatches++; }
+                    p.matches++;
+                    if (hasEvents) p.gaMatches++;
                 }
             });
             if (hasEvents) {
                 (m.events || []).forEach(ev => {
                     const p = players.find(x => x.id === ev.playerId);
                     if (p) {
-                        if (isHali) {
-                            if (ev.type === 'goal') p.haliGoals += (ev.count || 1);
-                            if (ev.type === 'assist') p.haliAssists += (ev.count || 1);
-                        } else {
-                            if (ev.type === 'goal') p.goals += (ev.count || 1);
-                            if (ev.type === 'assist') p.assists += (ev.count || 1);
-                        }
+                        if (ev.type === 'goal') p.goals += (ev.count || 1);
+                        if (ev.type === 'assist') p.assists += (ev.count || 1);
                     }
                 });
             }
@@ -2393,7 +2742,6 @@
         // Yenilen gol hesapla (sadece asıl kaleciler için - mevkisinde KL olanlar)
         matches.forEach(m => {
             if (m.pending) return;
-            const isHali = m.location === 'Halısaha';
             const allPlayerIds = [...(m.team1Players || []), ...(m.team2Players || [])];
             allPlayerIds.forEach(pid => {
                 const p = players.find(x => x.id === pid);
@@ -2402,8 +2750,8 @@
                 const pos = getPlayerMatchPos(pid, m);
                 if (pos === 'KL') {
                     const inTeam1 = (m.team1Players || []).includes(pid);
-                    if (isHali) { p.haliConceded += inTeam1 ? (m.score2 || 0) : (m.score1 || 0); p.haliGkMatches++; }
-                    else { p.conceded += inTeam1 ? (m.score2 || 0) : (m.score1 || 0); p.gkMatches++; }
+                    p.conceded += inTeam1 ? (m.score2 || 0) : (m.score1 || 0);
+                    p.gkMatches++;
                 }
             });
         });
@@ -2427,39 +2775,24 @@
                 <td>${p.name}</td>
                 <td>${formatPositions(p)}</td>
                 <td>${p.foot}</td>
-                <td>${p.goals + p.haliGoals}</td>
-                <td>${p.assists + p.haliAssists}</td>
-                <td>${p.matches + p.haliMatches}</td>
+                <td>${p.goals}</td>
+                <td>${p.assists}</td>
+                <td>${p.matches}</td>
             </tr>
         `).join('');
     }
 
-    let playersFilter = 'okul';
-
-    function setPlayersFilter(f) {
-        playersFilter = f;
-        playersShown = 12;
-        renderPlayersTable();
-    }
-
     function renderPlayersTable() {
-        const btnStyle = (f) => `padding:6px 16px;border:2px solid ${playersFilter===f?'#1E90FF':'#ddd'};border-radius:20px;font-size:0.8rem;font-weight:700;cursor:pointer;background:${playersFilter===f?'#1E90FF':'transparent'};color:${playersFilter===f?'#fff':'#666'};transition:all 0.15s`;
-        const filterBar = `<div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
-            <button onclick="setPlayersFilter('okul')" style="${btnStyle('okul')}">Okul</button>
-            <button onclick="setPlayersFilter('halisaha')" style="${btnStyle('halisaha')}">Halısaha</button>
-            <button onclick="setPlayersFilter('genel')" style="${btnStyle('genel')}">Genel</button>
-        </div>`;
-        const getG = p => playersFilter === 'halisaha' ? p.haliGoals : playersFilter === 'genel' ? p.goals + p.haliGoals : p.goals;
-        const getA = p => playersFilter === 'halisaha' ? p.haliAssists : playersFilter === 'genel' ? p.assists + p.haliAssists : p.assists;
-        const getM = p => playersFilter === 'halisaha' ? p.haliMatches : playersFilter === 'genel' ? p.matches + p.haliMatches : p.matches;
-        const getGaM = p => playersFilter === 'halisaha' ? p.haliGaMatches : playersFilter === 'genel' ? p.gaMatches + p.haliGaMatches : p.gaMatches;
-        const getCon = p => playersFilter === 'halisaha' ? p.haliConceded : playersFilter === 'genel' ? p.conceded + p.haliConceded : p.conceded;
-        const getGkM = p => playersFilter === 'halisaha' ? p.haliGkMatches : playersFilter === 'genel' ? p.gkMatches + p.haliGkMatches : p.gkMatches;
+        const getG = p => p.goals;
+        const getA = p => p.assists;
+        const getM = p => p.matches;
+        const getGaM = p => p.gaMatches;
+        const getCon = p => p.conceded;
+        const getGkM = p => p.gkMatches;
         const sorted = [...players].sort((a, b) => (getG(b) + getA(b)) - (getG(a) + getA(a)));
         const visible = sorted.slice(0, playersShown);
-        document.getElementById('players-filter-bar').innerHTML = filterBar;
         document.getElementById('players-table').innerHTML = visible.map((p, i) => `
-            <tr onclick="openPlayerModal(${p.id}, '${playersFilter}')">
+            <tr onclick="openPlayerModal(${p.id})">
                 <td>${i + 1}</td>
                 <td>${p.name}</td>
                 <td>${formatPositions(p)}</td>
@@ -2484,21 +2817,17 @@
             return;
         }
 
-        // Halısaha en üstte, kendi içinde yeni tarih üstte, sonra okul yeni tarih üstte, oynanmamışlar en alta
+        // Yeni tarih üstte, oynanmamışlar en alta
         const sorted = [...matches].sort((a, b) => {
-            const aHali = a.location === 'Halısaha' ? 0 : 1;
-            const bHali = b.location === 'Halısaha' ? 0 : 1;
-            if (aHali !== bHali) return aHali - bHali;
             if (a.pending && !b.pending) return 1;
             if (!a.pending && b.pending) return -1;
             return new Date(b.date || 0) - new Date(a.date || 0);
         });
 
-        // Okul maçlarına tarih sırasına göre dinamik hafta numarası ata
+        // Sezonun maçlarına tarih sırasına göre dinamik hafta numarası ata
         let weekCounter = 0;
         window.weekMap = {}; const weekMap = window.weekMap;
         [...matches]
-            .filter(m => m.location !== 'Halısaha')
             .sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0))
             .forEach(m => {
                 weekCounter++;
@@ -2506,7 +2835,6 @@
             });
 
         function getWeekLabel(m) {
-            if (m.location === 'Halısaha') return 'Halısaha';
             return 'Hafta ' + (weekMap[m.id] || '-');
         }
 
@@ -2552,9 +2880,8 @@
                            m.score2 > m.score1 ? `<span style="color:#2ecc71;font-weight:700">${m.team2} Kazandı</span>` :
                            `<span style="color:#f39c12;font-weight:700">Berabere</span>`;
 
-            // Tür ve yer etiketleri
-            const typeBadge = m.matchType ? `<span style="font-size:0.7rem;padding:2px 8px;border-radius:10px;font-weight:600;background:${m.matchType==='Turnuva'?'#fff3e0;color:#e67e22':m.matchType==='Lig'?'#e8f5e9;color:#2e7d32':'#e3f2fd;color:#1565c0'}">${m.matchType}</span>` : '';
-            const locBadge = m.location ? `<span style="font-size:0.7rem;padding:2px 8px;border-radius:10px;font-weight:600;background:${m.location==='Halısaha'?'#e8f5e9;color:#2e7d32':'#f3e5f5;color:#7b1fa2'}">${m.location}</span>` : '';
+            // Tür etiketi
+            const typeBadge = m.matchType ? `<span style="font-size:0.7rem;padding:2px 8px;border-radius:10px;font-weight:600;background:${m.matchType==='Turnuva'?'#fff3e0;color:#e67e22':'#e3f2fd;color:#1565c0'}">${m.matchType}</span>` : '';
             const serieBadge = (m.serieMatch && m.matchType === 'Turnuva') ? `<span style="font-size:0.7rem;padding:2px 8px;border-radius:10px;background:#fce4ec;color:#c62828;font-weight:600">${m.serieMatch}/${m.serieTotal}</span>` : '';
 
             // Turnuva toplam sonucu (2. maçta göster)
@@ -2598,7 +2925,7 @@
                     <div class="match-header">
                         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
                             <span style="font-weight:700;color:#333">${getWeekLabel(m)}</span>
-                            ${typeBadge} ${locBadge} ${serieBadge}
+                            ${typeBadge} ${serieBadge}
                         </div>
                         <div style="display:flex;align-items:center;gap:8px">
                             ${result}
@@ -2639,26 +2966,14 @@
         homeContainer.innerHTML = latestTwo.map(renderMatchCard).join('');
     }
 
-    let kingsFilter = 'okul';
-
-    function setKingsFilter(f) {
-        kingsFilter = f;
-        renderKings();
-    }
-
     function renderKings() {
-        const container = document.getElementById('kings-container');
         const grid = document.getElementById('kings-grid');
 
-        const withGenel = players.map(p => Object.assign({}, p, {
-            _genelGoals: p.goals + p.haliGoals,
-            _genelAssists: p.assists + p.haliAssists
-        }));
-        const gField = kingsFilter === 'halisaha' ? 'haliGoals' : kingsFilter === 'genel' ? '_genelGoals' : 'goals';
-        const aField = kingsFilter === 'halisaha' ? 'haliAssists' : kingsFilter === 'genel' ? '_genelAssists' : 'assists';
+        const gField = 'goals';
+        const aField = 'assists';
 
-        const goalSorted = withGenel.filter(p => p[gField] > 0).sort((a, b) => b[gField] - a[gField]);
-        const assistSorted = withGenel.filter(p => p[aField] > 0).sort((a, b) => b[aField] - a[aField]);
+        const goalSorted = players.filter(p => p[gField] > 0).sort((a, b) => b[gField] - a[gField]);
+        const assistSorted = players.filter(p => p[aField] > 0).sort((a, b) => b[aField] - a[aField]);
 
         function rankClass(i) {
             if (i === 0) return 'gold';
@@ -2677,13 +2992,6 @@
                 </div>
             `).join('');
         }
-
-        const btnStyle = (f) => `padding:7px 18px;border:2px solid ${kingsFilter===f?'#1E90FF':'#ddd'};border-radius:20px;font-size:0.82rem;font-weight:700;cursor:pointer;background:${kingsFilter===f?'#1E90FF':'transparent'};color:${kingsFilter===f?'#fff':'#666'};transition:all 0.15s`;
-        container.innerHTML = `<div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap">
-            <button onclick="setKingsFilter('okul')" style="${btnStyle('okul')}">Okul</button>
-            <button onclick="setKingsFilter('halisaha')" style="${btnStyle('halisaha')}">Halısaha</button>
-            <button onclick="setKingsFilter('genel')" style="${btnStyle('genel')}">Genel</button>
-        </div>`;
 
         grid.innerHTML = `
             <div class="king-card">
@@ -2711,49 +3019,31 @@
             </label>
         `).join('');
         document.getElementById('match-date').value = new Date().toISOString().split('T')[0];
+        checkExtraPanel();
     }
 
     // Takım A seçildiğinde geri kalanları otomatik Takım B'ye ata
-    // Kaleci ID'leri
-    const goalkeeperIds = players.filter(p => p.positions[0] === 'KL').map(p => p.id);
+    // Kaleci ID'leri (görüntülenen sezonun kadrosundan)
+    function getGoalkeeperIds() {
+        return players.filter(p => p.positions[0] === 'KL').map(p => p.id);
+    }
 
     const MAX_TEAM_SIZE = 6;
 
+    // Misafir paneli her zaman açık; sadece bilgi metnini günceller
     function checkExtraPanel() {
-        const t1Count = parseInt(document.getElementById('match-t1-count').value) || 6;
-        const t2Count = parseInt(document.getElementById('match-t2-count').value) || 6;
-        const total = t1Count + t2Count;
-        const panel = document.getElementById('extra-panel');
-        const needed = total - players.length;
-
-        if (total > 12) {
-            panel.style.display = 'block';
-            const remaining = needed - extraMatchPlayers.length;
-            document.getElementById('extra-panel-info').textContent = `Toplam ${total} oyuncu gerekli, kadroda ${players.length} kişi var. ${remaining > 0 ? remaining + ' ekstra oyuncu daha ekleyin.' : 'Yeterli oyuncu eklendi.'}`;
-        } else {
-            panel.style.display = 'none';
-            extraMatchPlayers = [];
-            renderExtraMatchPlayers();
-        }
+        const info = document.getElementById('extra-panel-info');
+        if (!info) return;
+        info.textContent = extraMatchPlayers.length === 0
+            ? 'Kadroda olmayan biri maça katıldıysa buradan ekleyin. Misafir sadece bu maçın kaydında görünür.'
+            : extraMatchPlayers.length + ' misafir eklendi. Misafirler sadece bu maçın kaydında görünür.';
     }
 
-    // Ekstra oyuncu sistemi (maç ekleme)
+    // Misafir (ekstra) oyuncu sistemi (maç ekleme) - ID'ler 200'den başlar
     let extraMatchPlayers = [];
     let extraMatchIdCounter = 200;
 
-    function getExtraNeeded() {
-        const t1Count = parseInt(document.getElementById('match-t1-count').value) || 6;
-        const t2Count = parseInt(document.getElementById('match-t2-count').value) || 6;
-        return (t1Count + t2Count) - players.length;
-    }
-
     function addExtraMatchPlayer() {
-        const needed = getExtraNeeded();
-        if (extraMatchPlayers.length >= needed) {
-            notify('Fazla ekstra oyuncu ekleyemezsiniz! En fazla ' + needed + ' ekstra oyuncu eklenebilir.', true);
-            return;
-        }
-
         const nameInput = document.getElementById('extra-match-name');
         const posSelect = document.getElementById('extra-match-pos');
         const teamSelect = document.getElementById('extra-match-team');
@@ -2880,7 +3170,7 @@
 
         // Her takım için kaleci seçimi göster (en az 1 oyuncu seçildiyse)
         function getGkDefault(teamIds, selectId) {
-            const gkInTeam = teamIds.find(id => goalkeeperIds.includes(id));
+            const gkInTeam = teamIds.find(id => getGoalkeeperIds().includes(id));
             const prevEl = document.getElementById(selectId);
             const prevVal = prevEl ? parseInt(prevEl.value) : null;
             // Takımda kaleci varsa her zaman onu seç
@@ -3005,6 +3295,7 @@
 
     function editPendingMatch(matchId) {
         if (!isControlMode()) return;
+        if (!guardSeasonWrite()) return;
         const m = matches.find(x => x.id === matchId);
         if (!m || !m.pending) return;
         pendingMatchId = matchId;
@@ -3079,6 +3370,7 @@
     }
 
     function savePendingMatch() {
+        if (!isControlMode() || !guardSeasonWrite()) return;
         const m = matches.find(x => x.id === pendingMatchId);
         if (!m) return;
 
@@ -3107,7 +3399,7 @@
         m.events = Object.values(eventMap);
         m.pending = false;
 
-        saveData('9d_matches', matches);
+        saveData(sPath('matches'), matches);
         recalcPlayerStats();
         renderAll();
         closePendingModal();
@@ -3130,6 +3422,7 @@
 
     function openEditMatch(matchId) {
         if (!isControlMode()) return;
+        if (!guardSeasonWrite()) return;
         const m = matches.find(x => x.id === matchId);
         if (!m) return;
         editMatchId = matchId;
@@ -3164,8 +3457,9 @@
         // Kaleci seçimi
         const t1Ids = m.team1Players || [];
         const t2Ids = m.team2Players || [];
-        const currentGk1 = m.matchGk && m.matchGk.team1 ? m.matchGk.team1 : (t1Ids.find(id => goalkeeperIds.includes(id)) || t1Ids[0]);
-        const currentGk2 = m.matchGk && m.matchGk.team2 ? m.matchGk.team2 : (t2Ids.find(id => goalkeeperIds.includes(id)) || t2Ids[0]);
+        const gkIds = getGoalkeeperIds();
+        const currentGk1 = m.matchGk && m.matchGk.team1 ? m.matchGk.team1 : (t1Ids.find(id => gkIds.includes(id)) || t1Ids[0]);
+        const currentGk2 = m.matchGk && m.matchGk.team2 ? m.matchGk.team2 : (t2Ids.find(id => gkIds.includes(id)) || t2Ids[0]);
         const gkOpts1 = t1Ids.map(id => { const p = findPlayer(id, m); return p ? '<option value="' + p.id + '" ' + (id === currentGk1 ? 'selected' : '') + '>' + p.name + '</option>' : ''; }).join('');
         const gkOpts2 = t2Ids.map(id => { const p = findPlayer(id, m); return p ? '<option value="' + p.id + '" ' + (id === currentGk2 ? 'selected' : '') + '>' + p.name + '</option>' : ''; }).join('');
 
@@ -3181,17 +3475,9 @@
         document.getElementById('edit-match-body').innerHTML = `
             <div style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap">
                 <div style="flex:1;min-width:100px">
-                    <label style="display:block;font-weight:600;color:var(--text-secondary);margin-bottom:6px;font-size:0.85rem">Yer</label>
-                    <select id="edit-location" style="width:100%;padding:10px;border:2px solid var(--border);border-radius:8px;font-size:0.85rem;background:var(--card-bg);color:var(--text)">
-                        <option value="Okul" ${m.location==='Okul'?'selected':''}>Okul</option>
-                        <option value="Halısaha" ${m.location==='Halısaha'?'selected':''}>Halısaha</option>
-                    </select>
-                </div>
-                <div style="flex:1;min-width:100px">
                     <label style="display:block;font-weight:600;color:var(--text-secondary);margin-bottom:6px;font-size:0.85rem">Tür</label>
                     <select id="edit-type" style="width:100%;padding:10px;border:2px solid var(--border);border-radius:8px;font-size:0.85rem;background:var(--card-bg);color:var(--text)">
                         <option value="Dostluk" ${m.matchType==='Dostluk'?'selected':''}>Dostluk</option>
-                        <option value="Lig" ${m.matchType==='Lig'?'selected':''}>Lig</option>
                         <option value="Turnuva" ${m.matchType==='Turnuva'?'selected':''}>Turnuva</option>
                     </select>
                 </div>
@@ -3262,7 +3548,7 @@
     }
 
     function saveEditMatch() {
-        if (!isControlMode()) return;
+        if (!isControlMode() || !guardSeasonWrite()) return;
         const m = matches.find(x => x.id === editMatchId);
         if (!m) return;
 
@@ -3319,7 +3605,6 @@
             else eventMap[key] = { ...ev };
         });
 
-        m.location = document.getElementById('edit-location').value;
         m.matchType = document.getElementById('edit-type').value;
         if (m.matchType !== 'Turnuva') {
             m.serieId = null;
@@ -3342,7 +3627,7 @@
         if (editGkT2) editGk.team2 = parseInt(editGkT2.value);
         m.matchGk = editGk;
 
-        saveData('9d_matches', matches);
+        saveData(sPath('matches'), matches);
         recalcPlayerStats();
         matchesShown = 3;
         renderMatches();
@@ -3361,7 +3646,7 @@
     });
 
     function moveMatch(matchId, direction) {
-        if (!isControlMode()) return;
+        if (!isControlMode() || !guardSeasonWrite()) return;
         // Tarih sırasına göre sırala
         matches.sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0));
         const idx = matches.findIndex(m => m.id === matchId);
@@ -3374,12 +3659,12 @@
         matches[idx].date = matches[swapIdx].date;
         matches[swapIdx].date = tempDate;
 
-        saveData('9d_matches', matches);
+        saveData(sPath('matches'), matches);
         renderAll();
     }
 
     function deleteMatch(matchId) {
-        if (!isControlMode()) return;
+        if (!isControlMode() || !guardSeasonWrite()) return;
         if (!confirm('Bu maçı silmek istediğinize emin misiniz?')) return;
         const deleted = matches.find(m => m.id === matchId);
         matches = matches.filter(m => m.id !== matchId);
@@ -3393,7 +3678,7 @@
                     week: null,
                     team1: match1.team1, team2: match1.team2, score1: 0, score2: 0,
                     date: deleted.date,
-                    location: match1.location, matchType: 'Turnuva',
+                    matchType: 'Turnuva',
                     serieId: deleted.serieId, serieMatch: 2, serieTotal: 2,
                     team1Players: match1.team1Players, team2Players: match1.team2Players,
                     events: [], extraPlayers: match1.extraPlayers || [],
@@ -3401,7 +3686,7 @@
                 };
                 if (match1.matchGk) newMatch2.matchGk = match1.matchGk;
                 matches.push(newMatch2);
-                saveData('9d_matches', matches);
+                saveData(sPath('matches'), matches);
                 recalcPlayerStats();
                 renderAll();
                 notify('2. turnuva maçı silindi ve yeniden oynanmamış olarak oluşturuldu!');
@@ -3409,7 +3694,7 @@
             }
         }
 
-        saveData('9d_matches', matches);
+        saveData(sPath('matches'), matches);
         recalcPlayerStats();
         renderAll();
         notify('Maç silindi!');
@@ -3419,12 +3704,10 @@
         document.getElementById('match-score1').value = '0';
         document.getElementById('match-score2').value = '0';
         document.getElementById('match-date').value = new Date().toISOString().split('T')[0];
-        document.getElementById('match-location').value = 'Okul';
         document.getElementById('match-type').value = 'Dostluk';
         document.getElementById('tournament-extra').style.display = 'none';
         document.getElementById('match-t1-count').value = '6';
         document.getElementById('match-t2-count').value = '6';
-        document.getElementById('extra-panel').style.display = 'none';
         document.getElementById('gk-select-section').style.display = 'none';
         document.getElementById('event-list').innerHTML = '';
         document.getElementById('injury-toggle').checked = false;
@@ -3432,6 +3715,7 @@
         document.getElementById('injury-checkboxes').innerHTML = '';
         extraMatchPlayers = [];
         renderExtraMatchPlayers();
+        checkExtraPanel();
         document.querySelectorAll('input[name="team1"], input[name="team2"]').forEach(c => {
             c.checked = false; c.disabled = false;
             c.closest('.player-checkbox-item').style.opacity = '1';
@@ -3442,13 +3726,14 @@
 
     function saveMatch() {
         if (!isControlMode()) return;
+        // Maç ekleme her zaman güncel sezona yapılır
+        if (isPastSeasonView()) { notify('Maçlar sadece güncel sezona eklenebilir. Önce güncel sezona geçin.', true); return; }
         if (!rateLimit('saveMatch', 3000)) { notify('Çok hızlı! Birkaç saniye bekleyin.', true); return; }
         const team1 = document.getElementById('match-team1').value.trim() || 'Takım A';
         const team2 = document.getElementById('match-team2').value.trim() || 'Takım B';
         const score1 = parseInt(document.getElementById('match-score1').value) || 0;
         const score2 = parseInt(document.getElementById('match-score2').value) || 0;
         const date = document.getElementById('match-date').value;
-        const location = document.getElementById('match-location').value;
         const matchType = document.getElementById('match-type').value;
 
         const team1Players = [...document.querySelectorAll('input[name="team1"]:checked')].map(c => parseInt(c.value));
@@ -3530,7 +3815,7 @@
             id: matchId,
             week: weekNum,
             team1, team2, score1, score2, date,
-            location, matchType,
+            matchType,
             serieId, serieMatch: matchType === 'Turnuva' ? 1 : null, serieTotal: matchType === 'Turnuva' ? 2 : null,
             team1Players, team2Players, events, extraPlayers: extraNames, matchGk, injuries
         };
@@ -3549,7 +3834,7 @@
                 id: matchId + 1,
                 week: weekNum + 1,
                 team1, team2, score1: 0, score2: 0, date: date2,
-                location, matchType: 'Turnuva',
+                matchType: 'Turnuva',
                 serieId, serieMatch: 2, serieTotal: 2,
                 team1Players, team2Players, events: [], extraPlayers: extraNames,
                 pending: true // oynanmamış
@@ -3557,13 +3842,13 @@
             matches.push(match2);
         }
 
-        saveData('9d_matches', matches);
+        saveData(sPath('matches'), matches);
         recalcPlayerStats();
         renderAll();
         notify('Maç başarıyla kaydedildi!' + (matchType === 'Turnuva' ? ' (2. maç otomatik oluşturuldu)' : ''));
 
         // Duyuru oluştur
-        const notifText = `Yeni maç eklendi: ${team1} ${score1} - ${score2} ${team2} (${location}, ${matchType}, ${date})`;
+        const notifText = `Yeni maç eklendi: ${team1} ${score1} - ${score2} ${team2} (${matchType}, ${date})`;
         createNotification(notifText);
 
         // Reset form
@@ -3572,21 +3857,21 @@
         document.getElementById('match-score1').value = '0';
         document.getElementById('match-score2').value = '0';
         document.getElementById('match-type').value = 'Dostluk';
-        document.getElementById('match-location').value = 'Okul';
         document.getElementById('tournament-extra').style.display = 'none';
         document.getElementById('event-list').innerHTML = '';
         document.querySelectorAll('input[name="team1"], input[name="team2"]').forEach(c => { c.checked = false; c.disabled = false; c.closest('.player-checkbox-item').style.opacity = '1'; });
         document.querySelectorAll('input[name="team2"]').forEach(cb => { cb.disabled = true; });
         extraMatchPlayers = [];
         renderExtraMatchPlayers();
+        checkExtraPanel();
         document.getElementById('match-t1-count').value = '6';
         document.getElementById('match-t2-count').value = '6';
-        document.getElementById('extra-panel').style.display = 'none';
     }
 
     // ===== PLAYER MODAL =====
     // Bir maçta oyuncunun hangi mevkide oynadığını bul
-    function getPlayerMatchPos(playerId, match) {
+    function getPlayerMatchPos(playerId, match, roster) {
+        const list = roster || players;
         const boranId = 11, demirId = 12;
         const inTeam1 = (match.team1Players || []).includes(playerId);
         const teamPlayers = inTeam1 ? (match.team1Players || []) : (match.team2Players || []);
@@ -3599,7 +3884,7 @@
         if (match.matchGk && match.matchGk[teamKey]) {
             // Boran kaleci seçilmediyse STP oynasın
             if (playerId === boranId) return 'STP';
-            const p = players.find(x => x.id === playerId);
+            const p = list.find(x => x.id === playerId);
             if (!p) return '?';
             // Mevkisi KL olan ama kaleci seçilmeyen oyuncu (Ege Demir) → STP
             if (p.positions[0] === 'KL') return 'STP';
@@ -3613,11 +3898,12 @@
         }
 
         // Normal mevki
-        const p = players.find(x => x.id === playerId);
+        const p = list.find(x => x.id === playerId);
         return p ? p.positions[0] : '?';
     }
 
-    function calcStats(matchList, id) {
+    function calcStats(matchList, id, roster) {
+        const list = roster || players;
         const wins = matchList.filter(m => {
             const inTeam1 = (m.team1Players || []).includes(id);
             return inTeam1 ? m.score1 > m.score2 : m.score2 > m.score1;
@@ -3633,9 +3919,9 @@
                 }
             });
             // Yenilen gol: sadece asıl kaleciler için (mevkisinde KL olanlar)
-            const playerObj = players.find(x => x.id === id);
+            const playerObj = list.find(x => x.id === id);
             if (playerObj && playerObj.positions.includes('KL')) {
-                const pos = getPlayerMatchPos(id, m);
+                const pos = getPlayerMatchPos(id, m, list);
                 if (pos === 'KL') {
                     const inTeam1 = (m.team1Players || []).includes(id);
                     conceded += inTeam1 ? (m.score2 || 0) : (m.score1 || 0);
@@ -3647,8 +3933,8 @@
         return { goals, assists, matches: matchList.length, wins, draws, losses, winRate, conceded, gkMatches };
     }
 
-    function renderStatsGrid(s, playerId) {
-        const p = playerId ? players.find(x => x.id === playerId) : null;
+    function renderStatsGrid(s, playerId, roster) {
+        const p = playerId ? (roster || players).find(x => x.id === playerId) : null;
         const isNaturalGk = p && p.positions.includes('KL');
         const gkRow = (s.gkMatches > 0 && isNaturalGk) ? `
             <div class="info-item" style="border:1px solid #e74c3c33"><div class="info-value" style="color:#e74c3c">${s.conceded}</div><div class="info-label">Yenilen Gol</div></div>
@@ -3670,10 +3956,68 @@
         `;
     }
 
+    // ----- Oyuncu sezon / kariyer istatistikleri -----
+    function playerMatchesIn(matchList, id) {
+        return matchList.filter(m =>
+            !m.pending && ((m.team1Players || []).includes(id) || (m.team2Players || []).includes(id))
+        ).sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+    }
+    // Oyuncunun kadrosunda bulunduğu sezonlar
+    function playerSeasonOptions(id) {
+        return getSeasonIds().filter(sid => seasonRoster(sid).some(p => p.id === id));
+    }
+    function defaultPlayerSeason(id) {
+        const opts = playerSeasonOptions(id);
+        if (opts.includes(viewSeasonId)) return viewSeasonId;
+        return opts.length ? opts[opts.length - 1] : viewSeasonId;
+    }
+    // sel: sezon ID'si veya 'kariyer'
+    function getPlayerStatsView(id, sel) {
+        if (legacyMode) {
+            const list = playerMatchesIn(matches, id);
+            return { title: 'Sezon İstatistikleri', stats: calcStats(list, id, players), list, roster: players, p: players.find(x => x.id === id) };
+        }
+        if (sel === 'kariyer') {
+            const tot = { goals: 0, assists: 0, matches: 0, wins: 0, draws: 0, losses: 0, conceded: 0, gkMatches: 0 };
+            let list = [];
+            const posUnion = new Set();
+            let lastP = null;
+            playerSeasonOptions(id).forEach(sid => {
+                const roster = seasonRoster(sid);
+                const rp = roster.find(x => x.id === id);
+                if (rp) { rp.positions.forEach(x => posUnion.add(x)); lastP = rp; }
+                const ms = playerMatchesIn(seasonMatches(sid), id);
+                const s = calcStats(ms, id, roster);
+                Object.keys(tot).forEach(k => { tot[k] += s[k] || 0; });
+                list = list.concat(ms);
+            });
+            tot.winRate = tot.matches > 0 ? ((tot.wins / tot.matches) * 100).toFixed(0) : 0;
+            list.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+            const unionRoster = [{ id, positions: [...posUnion] }];
+            return { title: 'Tüm Sezonlar (Kariyer)', stats: tot, list, roster: unionRoster, p: lastP };
+        }
+        const roster = seasonRoster(sel);
+        const list = playerMatchesIn(seasonMatches(sel), id);
+        return { title: seasonShortName(sel) + ' Sezon İstatistikleri', stats: calcStats(list, id, roster), list, roster, p: roster.find(x => x.id === id) };
+    }
+    // Sezon seçim butonları (oyuncu modalı ve Performansım)
+    function seasonPillsHtml(id, active, onclickTpl) {
+        if (legacyMode) return '';
+        const opts = playerSeasonOptions(id);
+        const btnStyle = (f) => `padding:8px 16px;border:2px solid ${active===f?'#1E90FF':'#ddd'};border-radius:8px;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.2s;background:${active===f?'#1E90FF':'transparent'};color:${active===f?'#fff':'#888'}`;
+        const btn = (val, label) => `<button onclick="${onclickTpl.replace('__S__', val)}" style="${btnStyle(val)}">${label}</button>`;
+        return opts.map(sid => btn(sid, seasonShortName(sid))).join('') + (opts.length > 0 ? btn('kariyer', 'Tüm Sezonlar') : '');
+    }
+    // Turnuva 2. maçının eşi (her sezonda aranır)
+    function findSerieFirstMatch(m) {
+        const all = legacyMode ? matches : getSeasonIds().reduce((acc, sid) => acc.concat(seasonMatches(sid)), []);
+        return all.find(x => x.serieId === m.serieId && x.serieMatch === 1);
+    }
+
     let currentPlayerModalId = null;
 
     function openPlayerModal(id, filter) {
-        const p = players.find(x => x.id === id);
+        const p = players.find(x => x.id === id) || findPlayerAnySeason(id);
         if (!p) return;
         // Bağlı kullanıcı kendi oyuncusuna tıklayamaz
         const linkedId = parseInt(getLinkedPlayerId());
@@ -3682,43 +4026,35 @@
             return;
         }
         currentPlayerModalId = id;
-        const activeFilter = filter || 'genel';
+        const activeFilter = (filter && (filter === 'kariyer' || seasonInfo(filter))) ? filter : defaultPlayerSeason(id);
 
         document.getElementById('modal-player-name').textContent = p.name;
 
-        const allPlayerMatches = matches.filter(m =>
-            !m.pending && ((m.team1Players || []).includes(id) || (m.team2Players || []).includes(id))
-        ).sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
-
-        // Filtreye göre maçları seç
-        let filteredMatches;
-        if (activeFilter === 'okul') filteredMatches = allPlayerMatches.filter(m => m.location !== 'Halısaha');
-        else if (activeFilter === 'halisaha') filteredMatches = allPlayerMatches.filter(m => m.location === 'Halısaha');
-        else filteredMatches = allPlayerMatches;
-
-        const stats = calcStats(filteredMatches, id);
-
-        const btnStyle = (f) => `padding:8px 16px;border:2px solid ${activeFilter===f?'#1E90FF':'#ddd'};border-radius:8px;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all 0.2s;background:${activeFilter===f?'#1E90FF':'#fff'};color:${activeFilter===f?'#fff':'#666'}`;
+        const view = getPlayerStatsView(id, activeFilter);
+        const filteredMatches = view.list;
+        const stats = view.stats;
+        // Mevkiler: seçilen sezonun kaydı (kariyer için son sezon)
+        const shownP = view.p || p;
+        const canEditPositions = isControlMode() && players.some(x => x.id === id);
 
         document.getElementById('modal-body').innerHTML = `
             <div style="margin-bottom:16px">
                 <strong>Mevkiler:</strong>
                 <div class="player-positions">
-                    ${p.positions.map(pos => `<span class="position-tag" style="${pos === (p.primaryPos || p.positions[0]) ? 'background:var(--primary);color:#fff;font-weight:700' : ''}">${pos}</span>`).join('')}
+                    ${shownP.positions.map(pos => `<span class="position-tag" style="${pos === (shownP.primaryPos || shownP.positions[0]) ? 'background:var(--primary);color:#fff;font-weight:700' : ''}">${pos}</span>`).join('')}
                 </div>
             </div>
             <div style="margin-bottom:16px">
-                <strong>Kullanılan Ayak:</strong> ${p.foot}
+                <strong>Kullanılan Ayak:</strong> ${shownP.foot}
             </div>
 
             <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
-                <button onclick="openPlayerModal(${id},'genel')" style="${btnStyle('genel')}">Genel</button>
-                <button onclick="openPlayerModal(${id},'okul')" style="${btnStyle('okul')}">Okul</button>
-                <button onclick="openPlayerModal(${id},'halisaha')" style="${btnStyle('halisaha')}">Halısaha</button>
-                ${isControlMode() ? `<button onclick="openEditPlayerPositions(${id})" style="margin-left:auto;padding:6px 14px;border:2px solid #9b59b6;border-radius:8px;background:#fff;color:#9b59b6;font-size:0.75rem;font-weight:700;cursor:pointer">Mevkileri Düzenle</button><button onclick="openLinkUserModal(${id})" style="padding:6px 14px;border:2px solid #e67e22;border-radius:8px;background:#fff;color:#e67e22;font-size:0.75rem;font-weight:700;cursor:pointer">Kullanıcı Bağla</button>` : ''}
+                ${seasonPillsHtml(id, activeFilter, `openPlayerModal(${id},'__S__')`)}
+                ${isControlMode() ? `${canEditPositions ? `<button onclick="openEditPlayerPositions(${id})" style="margin-left:auto;padding:6px 14px;border:2px solid #9b59b6;border-radius:8px;background:#fff;color:#9b59b6;font-size:0.75rem;font-weight:700;cursor:pointer">Mevkileri Düzenle</button>` : ''}<button onclick="openLinkUserModal(${id})" style="${canEditPositions ? '' : 'margin-left:auto;'}padding:6px 14px;border:2px solid #e67e22;border-radius:8px;background:#fff;color:#e67e22;font-size:0.75rem;font-weight:700;cursor:pointer">Kullanıcı Bağla</button>` : ''}
             </div>
 
-            ${filteredMatches.length === 0 ? '<p style="color:#aaa;font-size:0.85rem;text-align:center;padding:16px">Bu kategoride henüz maç yok</p>' : renderStatsGrid(stats, id)}
+            <h3 style="color:#1E90FF;margin:0 0 12px;font-size:0.95rem">${view.title}</h3>
+            ${filteredMatches.length === 0 ? '<p style="color:#aaa;font-size:0.85rem;text-align:center;padding:16px">Bu sezonda henüz maç yok</p>' : renderStatsGrid(stats, id, view.roster)}
 
             <h3 style="color:#1E90FF;margin:16px 0 12px">Son Maçlar</h3>
             ${filteredMatches.length === 0 ? '' :
@@ -3730,12 +4066,11 @@
                 const resultText = draw ? 'B' : (won ? 'G' : 'M');
                 const matchGoals = (m.events || []).filter(e => e.playerId === id && e.type === 'goal').reduce((s, e) => s + (e.count || 1), 0);
                 const matchAssists = (m.events || []).filter(e => e.playerId === id && e.type === 'assist').reduce((s, e) => s + (e.count || 1), 0);
-                // Turnuva etiketi, yer etiketi ve toplam skor
+                // Turnuva etiketi ve toplam skor
                 const serieBadge = (m.serieMatch && m.matchType === 'Turnuva') ? `<span style="font-size:0.65rem;padding:1px 6px;border-radius:6px;background:#fce4ec;color:#c62828;font-weight:700">${m.serieMatch}/${m.serieTotal}</span>` : '';
-                const locTag = m.location === 'Halısaha' ? `<span style="font-size:0.6rem;padding:1px 5px;border-radius:5px;background:#e8f5e9;color:#2e7d32;font-weight:700">HS</span>` : '';
                 let totalLine = '';
                 if (m.serieId && m.serieMatch === 2 && m.matchType === 'Turnuva') {
-                    const m1 = matches.find(x => x.serieId === m.serieId && x.serieMatch === 1);
+                    const m1 = findSerieFirstMatch(m);
                     if (m1 && !m1.pending) {
                         const tT1 = m1.score1 + m.score1, tT2 = m1.score2 + m.score2;
                         totalLine = `<div style="font-size:0.7rem;color:#e67e22;font-weight:700;margin-top:2px">Toplam: ${tT1} - ${tT2}</div>`;
@@ -3747,13 +4082,12 @@
                 const _hoverBg = _dk ? '#2a3a5a' : '#eef4ff';
                 const _gaColor = _dk ? '#aaa' : '#666';
                 const _serieBg = (m.serieMatch && m.matchType === 'Turnuva') ? (_dk ? '#3a1a2a' : '#fce4ec') : '';
-                const _locBg = m.location === 'Halısaha' ? (_dk ? '#1a3a2a' : '#e8f5e9') : '';
 
                 return `
                     <div onclick="document.getElementById('player-modal').classList.remove('show');openMatchModal(${m.id})" style="display:flex;align-items:center;gap:12px;padding:8px 12px;background:${_cardBg};border-radius:8px;margin-bottom:6px;cursor:pointer;transition:background 0.15s" onmouseover="this.style.background='${_hoverBg}'" onmouseout="this.style.background='${_cardBg}'">
                         <span style="width:28px;height:28px;border-radius:50%;background:${resultColor};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.8rem">${resultText}</span>
                         <div style="flex:1">
-                            <div style="display:flex;align-items:center;gap:6px">${m.team1} <strong>${m.score1} - ${m.score2}</strong> ${m.team2} ${serieBadge} ${locTag}</div>
+                            <div style="display:flex;align-items:center;gap:6px">${m.team1} <strong>${m.score1} - ${m.score2}</strong> ${m.team2} ${serieBadge}</div>
                             ${totalLine}
                         </div>
                         <span style="font-size:0.8rem;color:${_gaColor}">${matchGoals}G ${matchAssists}A</span>
@@ -3898,9 +4232,13 @@
     }
 
     function openMatchModal(matchId) {
-        const m = matches.find(x => x.id === matchId);
-        if (!m) return;
+        // Maç görüntülenen sezonda yoksa diğer sezonlarda ara (kariyer listesi için)
+        const found = findMatchAnySeason(matchId);
+        if (!found) return;
+        withSeasonRoster(found.sid, () => renderMatchModal(found.m));
+    }
 
+    function renderMatchModal(m) {
         document.getElementById('match-modal-title').textContent = `Hafta ${m.week || '-'} — ${m.team1} vs ${m.team2}`;
 
         const t1Players = (m.team1Players || []).map(id => findPlayer(id, m)).filter(Boolean);
@@ -4035,6 +4373,7 @@
 
     // Eksik oyuncu sistemi - takım sayısı kadroya sığmıyorsa gelmeyen oyuncuları sor
     function checkExtraPlayers() {
+        const players = getBuilderRoster(); // Kadro kurucu her zaman güncel sezonu kullanır
         const t1 = parseInt(document.getElementById('team1-size').value) || 6;
         const t2 = parseInt(document.getElementById('team2-size').value) || 6;
         const total = t1 + t2;
@@ -4056,6 +4395,7 @@
     }
 
     function validateAbsent() {
+        const players = getBuilderRoster();
         const t1 = parseInt(document.getElementById('team1-size').value) || 6;
         const t2 = parseInt(document.getElementById('team2-size').value) || 6;
         const total = t1 + t2;
@@ -4091,13 +4431,27 @@
         6: 'MOO',  // Egemen Işık
     };
 
+    // Sezona özel güç puanı (Oyuncu Ekle ile girilen); yoksa koddaki playerRatings kullanılır
+    function getSeasonRating(p) {
+        const r = seasonSettings(currentSeasonId).playerRatings;
+        const v = r ? r[p.id] : undefined;
+        return (v !== undefined && v !== null && !isNaN(Number(v))) ? Number(v) : getPlayerRating(p);
+    }
+
+    // Sezona özel sabit mevkiler; sezonda tanımlı değilse koddaki fixedPositions kullanılır
+    function getFixedPositions() {
+        const f = seasonSettings(currentSeasonId).fixedPositions;
+        return f || fixedPositions;
+    }
+
     function getBuilderPos(p) {
-        if (fixedPositions[p.id]) return fixedPositions[p.id];
+        const fp = getFixedPositions();
+        if (fp[p.id]) return fp[p.id];
         return p.positions[0];
     }
 
     function getPosCategory(positions, playerId) {
-        const p = fixedPositions[playerId] || positions[0];
+        const p = getFixedPositions()[playerId] || positions[0];
         if (p === 'KL') return 'KL';
         if (p === 'STP' || p === 'MDO') return 'STP';
         if (p === 'MO' || p === 'MOO') return 'MO';
@@ -4105,6 +4459,7 @@
     }
 
     function buildTeams() {
+        const players = getBuilderRoster(); // Kadro kurucu her zaman güncel sezonu kullanır
         const t1Size = parseInt(document.getElementById('team1-size').value) || 5;
         const t2Size = parseInt(document.getElementById('team2-size').value) || 5;
         const totalNeeded = t1Size + t2Size;
@@ -4127,7 +4482,7 @@
         // Oyuncuları puanla ve karıştır
         const rated = allPlayers.map(p => ({
             ...p,
-            rating: getPlayerRating(p),
+            rating: getSeasonRating(p),
             category: getPosCategory(p.positions, p.id),
             builderPos: getBuilderPos(p)
         }));
@@ -4341,7 +4696,7 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'Oyuncu İstatistikleri.xls';
+        a.download = 'Oyuncu İstatistikleri' + (legacyMode ? '' : ' (' + viewSeasonId + ')') + '.xls';
         a.click();
         URL.revokeObjectURL(url);
         notify('Oyuncu istatistikleri indirildi!');
@@ -4413,7 +4768,7 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'Maç Sonuçları.xls';
+        a.download = 'Maç Sonuçları' + (legacyMode ? '' : ' (' + viewSeasonId + ')') + '.xls';
         a.click();
         URL.revokeObjectURL(url);
         notify('Excel dosyası indirildi!');
@@ -4574,12 +4929,15 @@
             if (!snap.val()) {
                 const role = SUPER_ADMIN_EMAILS.includes(user.email) ? 'admin' : 'observer';
                 db.ref('9d_users/' + user.uid + '/role').set(role);
-                db.ref('9d_notifications').push({
-                    text: 'Yeni kullanıcı kaydoldu: ' + displayName + ' (' + user.email + ')',
-                    date: new Date().toISOString(),
-                    createdBy: user.email,
-                    category: 'sistem',
-                    adminOnly: true
+                // Sezon bilgisi yüklendikten sonra güncel sezonun duyurularına yaz
+                modeReady.then(() => {
+                    db.ref(cPath('notifications')).push({
+                        text: 'Yeni kullanıcı kaydoldu: ' + displayName + ' (' + user.email + ')',
+                        date: new Date().toISOString(),
+                        createdBy: user.email,
+                        category: 'sistem',
+                        adminOnly: true
+                    });
                 });
             }
         });
@@ -4604,6 +4962,8 @@
         document.body.style.visibility = 'visible';
 
         if (user) {
+            // Giriş öncesi izin hatasıyla kapanan dinleyicileri yeniden bağla
+            startDataListeners();
             saveUserToDb(user);
 
             getUserRole(user.uid, role => {
@@ -4837,8 +5197,10 @@
     }
 
     // ===== OYUNCU BİLGİ DÜZENLEME =====
+    // Kullanıcının kendi bilgilerini düzenlemesi her zaman güncel sezona yapılır
     function openEditPlayerInfo(playerId) {
-        const p = players.find(x => x.id === playerId);
+        if (isPastSeasonView()) { notify('Geçmiş sezonlarda değişiklik yapılamaz.', true); return; }
+        const p = seasonRoster(currentSeasonId).find(x => x.id === playerId);
         if (!p) return;
 
         const allPositions = ['SNT','SĞK','SLK','MOO','MO','MDO','STP','KL'];
@@ -4865,7 +5227,8 @@
     function savePlayerInfo(playerId) {
         const checkedPos = [...document.querySelectorAll('input[name="edit-pos"]:checked')].map(c => c.value);
         const foot = document.getElementById('edit-foot').value;
-        const p = players.find(x => x.id === playerId);
+        if (isPastSeasonView()) { notify('Geçmiş sezonlarda değişiklik yapılamaz.', true); return; }
+        const p = seasonRoster(currentSeasonId).find(x => x.id === playerId);
         if (!p) return;
 
         if (checkedPos.length === 0) { notify('En az bir mevki seçin!', true); return; }
@@ -4876,7 +5239,7 @@
         if (posChanged && !isControlMode()) {
             // Onay isteği oluştur
             const user = auth.currentUser;
-            db.ref('9d_pending_edits').push({
+            db.ref(cPath('pending_edits')).push({
                 playerId: playerId,
                 playerName: p.name,
                 requestedBy: user ? user.email : 'Bilinmeyen',
@@ -4888,7 +5251,7 @@
                 status: 'pending'
             }).then(() => {
                 // Ayak değişikliğini hemen uygula
-                db.ref('9d_player_edits/' + playerId + '/foot').set(foot);
+                db.ref(cPath('player_edits/' + playerId + '/foot')).set(foot);
                 createNotification(p.name + ' mevki değişikliği talep etti: ' + checkedPos.join(', ') + ' (Onay bekliyor)');
                 notify('Mevki değişikliği onay için gönderildi! Ayak bilgisi güncellendi.');
                 document.getElementById('profile-modal').classList.remove('show');
@@ -4896,7 +5259,7 @@
             });
         } else {
             // Kontrolcü veya mevki değişmedi → direkt uygula
-            db.ref('9d_player_edits/' + playerId).set({
+            db.ref(cPath('player_edits/' + playerId)).set({
                 positions: sortPositions(checkedPos),
                 foot: foot
             }).then(() => {
@@ -4911,6 +5274,7 @@
     function openEditPlayerPositions(playerId) {
         const p = players.find(x => x.id === playerId);
         if (!p || !isControlMode()) return;
+        if (!guardSeasonWrite()) return;
 
         const allPositions = ['SNT','SĞK','SLK','MOO','MO','MDO','STP','KL'];
         const posChecks = allPositions.map(pos =>
@@ -4953,8 +5317,10 @@
 
         if (checkedPos.length === 0) { notify('En az bir mevki seçin!', true); return; }
         if (!checkedPos.includes(primaryPos)) { notify('Asıl mevki seçili mevkilerden biri olmalı!', true); return; }
+        if (!isControlMode() || !guardSeasonWrite()) return;
 
-        db.ref('9d_player_edits/' + playerId).update({
+        // Mevki değişikliği sadece görüntülenen sezonda geçerli
+        db.ref(sPath('player_edits/' + playerId)).update({
             positions: sortPositions(checkedPos),
             primaryPos: primaryPos
         }).then(() => {
@@ -4974,7 +5340,7 @@
     });
 
     function loadPendingEdits() {
-        db.ref('9d_pending_edits').once('value', snap => {
+        db.ref(cPath('pending_edits')).once('value', snap => {
             const edits = snap.val();
             const body = document.getElementById('pending-edits-body');
             if (!edits) {
@@ -5009,11 +5375,11 @@
 
     // Duyurulardaki onay bekliyor metnini güncelle
     function updatePendingNotifText(playerName, newStatus) {
-        db.ref('9d_notifications').once('value', snap => {
+        db.ref(cPath('notifications')).once('value', snap => {
             const notifs = snap.val() || {};
             Object.entries(notifs).forEach(([nid, n]) => {
                 if (n.text && n.text.includes(playerName) && n.text.includes('Onay bekliyor')) {
-                    db.ref('9d_notifications/' + nid + '/text').set(n.text.replace('(Onay bekliyor)', '(' + newStatus + ')'));
+                    db.ref(cPath('notifications/' + nid + '/text')).set(n.text.replace('(Onay bekliyor)', '(' + newStatus + ')'));
                 }
             });
             renderDuyurular();
@@ -5021,11 +5387,11 @@
     }
 
     function approvePendingEdit(key) {
-        db.ref('9d_pending_edits/' + key).once('value', snap => {
+        db.ref(cPath('pending_edits/' + key)).once('value', snap => {
             const edit = snap.val();
             if (!edit) return;
-            db.ref('9d_player_edits/' + edit.playerId + '/positions').set(edit.newPositions);
-            db.ref('9d_pending_edits/' + key + '/status').set('approved');
+            db.ref(cPath('player_edits/' + edit.playerId + '/positions')).set(edit.newPositions);
+            db.ref(cPath('pending_edits/' + key + '/status')).set('approved');
             createNotification(edit.playerName + ' mevki değişikliği onaylandı: ' + edit.newPositions.join(', '));
             updatePendingNotifText(edit.playerName, 'Onaylandı');
             notify('Mevki değişikliği onaylandı!');
@@ -5034,10 +5400,10 @@
     }
 
     function rejectPendingEdit(key) {
-        db.ref('9d_pending_edits/' + key).once('value', snap => {
+        db.ref(cPath('pending_edits/' + key)).once('value', snap => {
             const edit = snap.val();
             if (!edit) return;
-            db.ref('9d_pending_edits/' + key + '/status').set('rejected');
+            db.ref(cPath('pending_edits/' + key + '/status')).set('rejected');
             createNotification(edit.playerName + ' mevki değişikliği reddedildi');
             updatePendingNotifText(edit.playerName, 'Reddedildi');
             notify('Mevki değişikliği reddedildi!');
@@ -5049,15 +5415,15 @@
     // Duyurulardan onay/red
     function approveFromNotif(notifId) {
         if (!isControlMode()) { notify('Onay vermek için kontrolcü modunda olmalısınız!', true); return; }
-        db.ref('9d_pending_edits').once('value', snap => {
+        db.ref(cPath('pending_edits')).once('value', snap => {
             const edits = snap.val() || {};
             const pending = Object.entries(edits).find(([,e]) => e.status === 'pending');
             if (pending) {
                 approvePendingEdit(pending[0]);
                 // Duyuru metnini güncelle
-                db.ref('9d_notifications/' + notifId + '/text').once('value', tSnap => {
+                db.ref(cPath('notifications/' + notifId + '/text')).once('value', tSnap => {
                     const txt = tSnap.val() || '';
-                    db.ref('9d_notifications/' + notifId + '/text').set(txt.replace('(Onay bekliyor)', '(Onaylandı)'));
+                    db.ref(cPath('notifications/' + notifId + '/text')).set(txt.replace('(Onay bekliyor)', '(Onaylandı)'));
                     renderDuyurular();
                 });
             } else {
@@ -5068,14 +5434,14 @@
 
     function rejectFromNotif(notifId) {
         if (!isControlMode()) { notify('Onay vermek için kontrolcü modunda olmalısınız!', true); return; }
-        db.ref('9d_pending_edits').once('value', snap => {
+        db.ref(cPath('pending_edits')).once('value', snap => {
             const edits = snap.val() || {};
             const pending = Object.entries(edits).find(([,e]) => e.status === 'pending');
             if (pending) {
                 rejectPendingEdit(pending[0]);
-                db.ref('9d_notifications/' + notifId + '/text').once('value', tSnap => {
+                db.ref(cPath('notifications/' + notifId + '/text')).once('value', tSnap => {
                     const txt = tSnap.val() || '';
-                    db.ref('9d_notifications/' + notifId + '/text').set(txt.replace('(Onay bekliyor)', '(Reddedildi)'));
+                    db.ref(cPath('notifications/' + notifId + '/text')).set(txt.replace('(Onay bekliyor)', '(Reddedildi)'));
                     renderDuyurular();
                 });
             } else {
@@ -5087,14 +5453,14 @@
     function withdrawPendingEdit(notifId) {
         const user = auth.currentUser;
         if (!user) return;
-        db.ref('9d_pending_edits').once('value', snap => {
+        db.ref(cPath('pending_edits')).once('value', snap => {
             const edits = snap.val() || {};
             const myPending = Object.entries(edits).find(([,e]) => e.status === 'pending' && e.requestedByUid === user.uid);
             if (myPending) {
-                db.ref('9d_pending_edits/' + myPending[0]).remove();
-                db.ref('9d_notifications/' + notifId + '/text').once('value', tSnap => {
+                db.ref(cPath('pending_edits/' + myPending[0])).remove();
+                db.ref(cPath('notifications/' + notifId + '/text')).once('value', tSnap => {
                     const txt = tSnap.val() || '';
-                    db.ref('9d_notifications/' + notifId + '/text').set(txt.replace('(Onay bekliyor)', '(Geri çekildi)'));
+                    db.ref(cPath('notifications/' + notifId + '/text')).set(txt.replace('(Onay bekliyor)', '(Geri çekildi)'));
                     renderDuyurular();
                 });
                 notify('Onay isteği geri çekildi!');
@@ -5103,7 +5469,7 @@
     }
 
     function updatePendingEditsBadge() {
-        db.ref('9d_pending_edits').once('value', snap => {
+        db.ref(cPath('pending_edits')).once('value', snap => {
             const edits = snap.val();
             const badge = document.getElementById('pending-edits-badge');
             if (!edits) { badge.style.display = 'none'; return; }
@@ -5117,8 +5483,7 @@
         });
     }
 
-    // Periyodik güncelleme
-    db.ref('9d_pending_edits').on('value', () => { updatePendingEditsBadge(); });
+    // Rozet güncellemesi veri dinleyicilerinden (attachLegacyListeners / onSeasonDataChanged) yapılır
 
     // ===== KULLANICI-OYUNCU BAĞLAMA =====
     function getLinkedPlayerId() {
@@ -5185,10 +5550,21 @@
         });
     }
 
+    // 1 oyuncu = 1 hesap: oyuncunun eski bağlantıları kaldırılır, yeni hesap bağlanır (tek update, bütün sezonlarda geçerli)
     function linkUser(uid, playerId) {
-        db.ref('9d_user_links/' + uid).set(playerId).then(() => {
-            notify('Kullanıcı oyuncuya bağlandı!');
-            closeModal();
+        if (!isControlMode()) return;
+        db.ref('9d_user_links').once('value', snap => {
+            const links = snap.val() || {};
+            const updates = {};
+            Object.entries(links).forEach(([otherUid, pid]) => {
+                if (pid == playerId && otherUid !== uid) updates[otherUid] = null;
+            });
+            updates[uid] = playerId;
+            const removed = Object.keys(updates).length - 1;
+            db.ref('9d_user_links').update(updates).then(() => {
+                notify(removed > 0 ? 'Kullanıcı bağlandı, eski hesabın bağlantısı kaldırıldı!' : 'Kullanıcı oyuncuya bağlandı!');
+                closeModal();
+            }).catch(err => notify('Bağlanamadı: ' + err.message));
         });
     }
 
@@ -5200,6 +5576,13 @@
     }
 
     // Performansım sekmesini render et
+    let perfSeasonSel = null; // seçili sezon ID'si veya 'kariyer' (null = görüntülenen sezon)
+
+    function setPerfSeason(sel) {
+        perfSeasonSel = sel;
+        renderPerformansim();
+    }
+
     function renderPerformansim() {
         const user = auth.currentUser;
         if (!user) return;
@@ -5209,21 +5592,18 @@
             return;
         }
 
-        const p = players.find(x => x.id === linkedId);
+        const p = players.find(x => x.id === linkedId) || findPlayerAnySeason(linkedId);
         if (!p) {
             document.getElementById('performansim-content').innerHTML = '<div style="text-align:center;padding:40px;color:#aaa">Bağlı oyuncu bulunamadı</div>';
             return;
         }
 
-        const allPlayerMatches = matches.filter(m =>
-            !m.pending && ((m.team1Players || []).includes(linkedId) || (m.team2Players || []).includes(linkedId))
-        ).sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
-
-        const okulMatches = allPlayerMatches.filter(m => m.location !== 'Halısaha');
-        const haliMatches = allPlayerMatches.filter(m => m.location === 'Halısaha');
-        const genelStats = calcStats(allPlayerMatches, linkedId);
-        const okulStats = calcStats(okulMatches, linkedId);
-        const haliStats = calcStats(haliMatches, linkedId);
+        const sel = (perfSeasonSel && (perfSeasonSel === 'kariyer' || seasonInfo(perfSeasonSel))) ? perfSeasonSel : defaultPlayerSeason(linkedId);
+        const view = getPlayerStatsView(linkedId, sel);
+        const allPlayerMatches = view.list;
+        const shownP = view.p || p;
+        const canEditInfo = !isPastSeasonView() && seasonRoster(currentSeasonId).some(x => x.id === linkedId);
+        const pills = seasonPillsHtml(linkedId, sel, `setPerfSeason('__S__')`);
 
         const makeMatchRow = (m) => {
             const inTeam1 = (m.team1Players || []).includes(linkedId);
@@ -5233,12 +5613,9 @@
             const resultText = draw ? 'B' : (won ? 'G' : 'M');
             const mGoals = (m.events || []).filter(e => e.playerId === linkedId && e.type === 'goal').reduce((s, e) => s + (e.count || 1), 0);
             const mAssists = (m.events || []).filter(e => e.playerId === linkedId && e.type === 'assist').reduce((s, e) => s + (e.count || 1), 0);
-            const locTag = m.location === 'Halısaha'
-                ? '<span style="font-size:0.6rem;padding:1px 5px;border-radius:5px;background:#e8f5e9;color:#2e7d32;font-weight:700">HS</span>'
-                : '<span style="font-size:0.6rem;padding:1px 5px;border-radius:5px;background:#f3e5f5;color:#7b1fa2;font-weight:700">OK</span>';
             return '<div onclick="document.getElementById(\'user-profile-modal\').classList.remove(\'show\');openMatchModal(' + m.id + ')" style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg);border-radius:8px;margin-bottom:6px;cursor:pointer;transition:background 0.15s" onmouseover="this.style.background=\'#eef4ff\'" onmouseout="this.style.background=\'var(--bg)\'">' +
                 '<span style="width:28px;height:28px;border-radius:50%;background:' + resultColor + ';color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.8rem">' + resultText + '</span>' +
-                '<div style="flex:1"><div style="display:flex;align-items:center;gap:6px">' + m.team1 + ' <strong>' + m.score1 + ' - ' + m.score2 + '</strong> ' + m.team2 + ' ' + locTag + '</div>' +
+                '<div style="flex:1"><div style="display:flex;align-items:center;gap:6px">' + m.team1 + ' <strong>' + m.score1 + ' - ' + m.score2 + '</strong> ' + m.team2 + '</div>' +
                 '<div style="font-size:0.7rem;color:#aaa;margin-top:2px">' + (m.date || '') + '</div></div>' +
                 '<span style="font-size:0.8rem;color:var(--text-secondary)">' + mGoals + 'G ' + mAssists + 'A</span></div>';
         };
@@ -5249,25 +5626,17 @@
                     <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#1E90FF,#0066cc);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.4rem">${p.name[0]}</div>
                     <div>
                         <h2 style="margin:0;color:var(--text)">${p.name}</h2>
-                        <div style="display:flex;gap:6px;margin-top:4px">${p.positions.map(pos => `<span class="position-tag" style="${pos === (p.primaryPos || p.positions[0]) ? 'background:var(--primary);color:#fff;font-weight:700' : ''}">${pos}</span>`).join('')}</div>
+                        <div style="display:flex;gap:6px;margin-top:4px">${shownP.positions.map(pos => `<span class="position-tag" style="${pos === (shownP.primaryPos || shownP.positions[0]) ? 'background:var(--primary);color:#fff;font-weight:700' : ''}">${pos}</span>`).join('')}</div>
                     </div>
                 </div>
-                <button onclick="openEditPlayerInfo(${linkedId})" style="padding:7px 16px;background:#e67e22;color:#fff;border:none;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer">Bilgilerimi Düzenle</button>
+                ${canEditInfo ? `<button onclick="openEditPlayerInfo(${linkedId})" style="padding:7px 16px;background:#e67e22;color:#fff;border:none;border-radius:8px;font-size:0.8rem;font-weight:600;cursor:pointer">Bilgilerimi Düzenle</button>` : ''}
             </div>
+
+            ${pills ? `<div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">${pills}</div>` : ''}
 
             <div style="background:var(--card-bg);border-radius:14px;box-shadow:0 2px 12px var(--shadow);padding:20px;margin-bottom:12px;border-left:4px solid #1E90FF">
-                <h3 style="color:#1E90FF;margin:0 0 12px;font-size:1rem">&#127760; Genel Performans <span style="font-size:0.75rem;color:#aaa;font-weight:400">(${allPlayerMatches.length} maç)</span></h3>
-                ${allPlayerMatches.length === 0 ? '<p style="color:#aaa;font-size:0.85rem">Henüz maç yok</p>' : renderStatsGrid(genelStats, linkedId)}
-            </div>
-
-            <div style="background:var(--card-bg);border-radius:14px;box-shadow:0 2px 12px var(--shadow);padding:20px;margin-bottom:12px;border-left:4px solid #7b1fa2">
-                <h3 style="color:#7b1fa2;margin:0 0 12px;font-size:1rem">&#127981; Okul Performansı <span style="font-size:0.75rem;color:#aaa;font-weight:400">(${okulMatches.length} maç)</span></h3>
-                ${okulMatches.length === 0 ? '<p style="color:#aaa;font-size:0.85rem">Henüz okul maçı yok</p>' : renderStatsGrid(okulStats, linkedId)}
-            </div>
-
-            <div style="background:var(--card-bg);border-radius:14px;box-shadow:0 2px 12px var(--shadow);padding:20px;margin-bottom:12px;border-left:4px solid #2e7d32">
-                <h3 style="color:#2e7d32;margin:0 0 12px;font-size:1rem">&#127944; Halısaha Performansı <span style="font-size:0.75rem;color:#aaa;font-weight:400">(${haliMatches.length} maç)</span></h3>
-                ${haliMatches.length === 0 ? '<p style="color:#aaa;font-size:0.85rem">Henüz halısaha maçı yok</p>' : renderStatsGrid(haliStats, linkedId)}
+                <h3 style="color:#1E90FF;margin:0 0 12px;font-size:1rem">&#127760; ${view.title} <span style="font-size:0.75rem;color:#aaa;font-weight:400">(${allPlayerMatches.length} maç)</span></h3>
+                ${allPlayerMatches.length === 0 ? '<p style="color:#aaa;font-size:0.85rem">Henüz maç yok</p>' : renderStatsGrid(view.stats, linkedId, view.roster)}
             </div>
 
             <div style="background:var(--card-bg);border-radius:14px;box-shadow:0 2px 12px var(--shadow);padding:20px;margin-bottom:12px">
@@ -5297,18 +5666,19 @@
 
     function loadMvpMatchOptions() {
         // MVP anketi açılmamış maçları listele
-        db.ref('9d_polls').once('value', pollSnap => {
+        db.ref(cPath('polls')).once('value', pollSnap => {
             const polls = pollSnap.val() || {};
             const mvpMatchIds = new Set(Object.values(polls).filter(p => p.type === 'mvp' && p.matchId).map(p => p.matchId));
 
-            const playedMatches = matches.filter(m => !m.pending);
+            // MVP anketleri her zaman güncel sezonun maçları için açılır
+            const playedMatches = seasonMatches(currentSeasonId).filter(m => !m.pending);
             const availableMatches = playedMatches.filter(m => !mvpMatchIds.has(String(m.id)));
 
             const select = document.getElementById('poll-match-select');
             select.innerHTML = '<option value="">-- Maç Seçin --</option>';
             availableMatches.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0)).forEach(m => {
                 const wm = window.weekMap || {};
-                const weekLabel = m.location === 'Halısaha' ? 'Halısaha' : ('Hafta ' + (wm[m.id] || '?'));
+                const weekLabel = 'Hafta ' + (wm[m.id] || '?');
                 const label = `${weekLabel} | ${m.team1} ${m.score1}-${m.score2} ${m.team2} (${m.date || '-'})`;
                 select.innerHTML += `<option value="${m.id}">${label}</option>`;
             });
@@ -5327,7 +5697,7 @@
         if (!matchId) { document.getElementById('poll-mvp-preview').style.display = 'none'; selectedMvpMatchId = null; return; }
 
         selectedMvpMatchId = matchId;
-        const m = matches.find(x => x.id === matchId);
+        const m = seasonMatches(currentSeasonId).find(x => x.id === matchId);
         if (!m) return;
 
         const allIds = [...(m.team1Players || []), ...(m.team2Players || [])];
@@ -5368,13 +5738,15 @@
 
     function createPoll() {
         if (!isControlMode()) return;
+        // Anketler her zaman güncel sezonda açılır
+        if (isPastSeasonView()) { notify('Anketler sadece güncel sezonda açılabilir.', true); return; }
         if (!rateLimit('createPoll', 5000)) { notify('Çok hızlı! Birkaç saniye bekleyin.', true); return; }
 
         let title, desc, options, matchId = null;
 
         if (pollType === 'mvp') {
             if (!selectedMvpMatchId) { notify('Lütfen bir maç seçin!', true); return; }
-            const m = matches.find(x => x.id === selectedMvpMatchId);
+            const m = seasonMatches(currentSeasonId).find(x => x.id === selectedMvpMatchId);
             if (!m) return;
 
             matchId = String(selectedMvpMatchId);
@@ -5407,7 +5779,7 @@
             active: true
         };
 
-        db.ref('9d_polls/' + pollId).set(poll).then(() => {
+        db.ref(cPath('polls/' + pollId)).set(poll).then(() => {
             notify('Anket yayınlandı!');
             createNotification(`Yeni anket: "${title}"`);
             // Reset
@@ -5424,7 +5796,7 @@
     }
 
     function renderPolls() {
-        db.ref('9d_polls').once('value', snap => {
+        db.ref(sPath('polls')).once('value', snap => {
             const polls = snap.val();
             const container = document.getElementById('polls-list');
             if (!polls) {
@@ -5434,6 +5806,8 @@
 
             const user = auth.currentUser;
             const uid = user ? user.uid : null;
+            // Geçmiş sezon anketleri salt okunur: oy verilemez, sonuçlar gösterilir
+            const readOnly = isPastSeasonView();
             const list = Object.values(polls).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
             // Oy verilmemiş anketler önce, verilmişler sonra
@@ -5487,7 +5861,14 @@
                         </div>
                         ${poll.description ? `<p style="color:#666;font-size:0.85rem;margin-bottom:14px">${poll.description}</p>` : ''}
                         <div style="display:flex;flex-direction:column;gap:8px">
-                            ${poll.options.map((opt, i) => `
+                            ${readOnly ? poll.options.map((opt, i) => {
+                                const voteCount = Object.keys(opt.votes || {}).length;
+                                const pct = totalVotes > 0 ? Math.round((voteCount / totalVotes) * 100) : 0;
+                                return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-radius:10px;border:2px solid #eee;font-size:0.85rem">
+                                    <span style="color:#666">${String.fromCharCode(65+i)}. ${opt.text}</span>
+                                    <span style="color:#9b59b6;font-weight:700">${pct}% (${voteCount})</span>
+                                </div>`;
+                            }).join('') : poll.options.map((opt, i) => `
                                 <div onclick="votePoll('${poll.id}',${i})" style="padding:12px 16px;border-radius:10px;border:2px solid #eee;cursor:pointer;transition:all 0.2s" onmouseover="this.style.borderColor='#9b59b6'" onmouseout="this.style.borderColor='#eee'">
                                     <div style="display:flex;align-items:center;gap:10px">
                                         <span style="width:26px;height:26px;border-radius:50%;background:#f0f0f0;color:#888;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:800">${String.fromCharCode(65+i)}</span>
@@ -5497,7 +5878,7 @@
                             `).join('')}
                         </div>
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid #eee">
-                            <span style="font-size:0.75rem;color:#888">Oy vermek için bir şıkka tıklayın</span>
+                            <span style="font-size:0.75rem;color:#888">${readOnly ? 'Geçmiş sezon anketi · ' + totalVotes + ' oy' : 'Oy vermek için bir şıkka tıklayın'}</span>
                             <button class="auth-only" onclick="event.stopPropagation();deletePoll('${poll.id}')" style="background:none;border:none;color:#ccc;cursor:pointer;font-size:1.2rem;transition:color 0.2s" onmouseover="this.style.color='#e74c3c'" onmouseout="this.style.color='#ccc'" title="Anketi Sil">&times;</button>
                         </div>
                     </div>
@@ -5526,30 +5907,31 @@
     }
 
     function deletePoll(pollId) {
-        if (!isControlMode()) return;
+        if (!isControlMode() || !guardSeasonWrite()) return;
         if (!confirm('Bu anket silinecek. Emin misiniz?')) return;
-        db.ref('9d_polls/' + pollId).remove().then(() => {
+        db.ref(sPath('polls/' + pollId)).remove().then(() => {
             notify('Anket silindi!');
             renderPolls();
         });
     }
 
     function clearAllPolls() {
-        if (!isControlMode()) return;
-        if (!confirm('Tüm anketler herkes için silinecek. Emin misiniz?')) return;
-        db.ref('9d_polls').remove().then(() => {
+        if (!isControlMode() || !guardSeasonWrite()) return;
+        if (!confirm((isPastSeasonView() ? seasonDisplayName(viewSeasonId) + ' sezonunun tüm anketleri' : 'Tüm anketler') + ' herkes için silinecek. Emin misiniz?')) return;
+        db.ref(sPath('polls')).remove().then(() => {
             notify('Tüm anketler silindi!');
             renderPolls();
         });
     }
 
     function votePoll(pollId, optionIdx) {
+        if (isPastSeasonView()) { notify('Geçmiş sezon anketlerine oy verilemez.', true); return; }
         if (!rateLimit('vote', 2000)) return;
         const user = auth.currentUser;
         if (!user) { notify('Oy vermek için giriş yapın!', true); return; }
 
         // MVP anketinde kendine oy verme kontrolü
-        db.ref('9d_polls/' + pollId).once('value', pollSnap => {
+        db.ref(sPath('polls/' + pollId)).once('value', pollSnap => {
             const poll = pollSnap.val();
             if (poll && poll.type === 'mvp') {
                 const linkedId = parseInt(getLinkedPlayerId());
@@ -5567,7 +5949,7 @@
             const alreadyVoted = options.some(o => o.votes && o.votes[user.uid]);
             if (alreadyVoted) { notify('Bu ankete zaten oy verdiniz!', true); return; }
 
-            db.ref('9d_polls/' + pollId + '/options/' + optionIdx + '/votes/' + user.uid).set(true).then(() => {
+            db.ref(sPath('polls/' + pollId + '/options/' + optionIdx + '/votes/' + user.uid)).set(true).then(() => {
                 notify('Oyunuz kaydedildi!');
                 renderPolls();
             });
@@ -5598,7 +5980,7 @@
         const user = auth.currentUser;
         if (!user) return;
         const cat = category || getNotifCategory(text);
-        db.ref('9d_notifications').push({
+        db.ref(cPath('notifications')).push({
             text: sanitizeInput(text, 300),
             date: new Date().toISOString(),
             createdBy: user.email,
@@ -5610,7 +5992,7 @@
     function showUnreadNotifPopup() {
         const user = auth.currentUser;
         if (!user) return;
-        db.ref('9d_notifications').once('value', snap => {
+        db.ref(cPath('notifications')).once('value', snap => {
             const notifs = snap.val();
             if (!notifs) return;
             const readIds = getReadNotifIds();
@@ -5627,7 +6009,7 @@
         const key = '9d_read_notifs_' + user.uid;
         const clearedKey = '9d_notifs_cleared_seen_' + user.uid;
         // Temizlenme kontrolü
-        db.ref('9d_notifs_cleared').once('value', snap => {
+        db.ref(cPath('notifs_cleared')).once('value', snap => {
             const clearedAt = snap.val();
             const seenAt = parseInt(localStorage.getItem(clearedKey) || '0');
             if (clearedAt && clearedAt > seenAt) {
@@ -5642,17 +6024,18 @@
     function markAllAsRead() {
         const user = auth.currentUser;
         if (!user) return;
-        db.ref('9d_notifications').once('value', snap => {
+        // Görüntülenen sezonun duyurularını okundu işaretle (önceki okunanlar korunur)
+        db.ref(sPath('notifications')).once('value', snap => {
             const notifs = snap.val();
             if (!notifs) return;
-            const allIds = Object.keys(notifs);
-            localStorage.setItem('9d_read_notifs_' + user.uid, JSON.stringify(allIds));
+            const merged = new Set([...getReadNotifIds(), ...Object.keys(notifs)]);
+            localStorage.setItem('9d_read_notifs_' + user.uid, JSON.stringify([...merged]));
             updateNotifBadge();
         });
     }
 
     function updateNotifBadge() {
-        db.ref('9d_notifications').once('value', snap => {
+        db.ref(cPath('notifications')).once('value', snap => {
             const notifs = snap.val();
             const badge = document.getElementById('notif-badge');
             if (!notifs) { badge.textContent = '0'; badge.style.background = '#aaa'; return; }
@@ -5688,9 +6071,74 @@
     }
 
     // ===== VERİTABANI YEDEĞİ (sadece okur, hiçbir şey yazmaz) =====
-    const BACKUP_KEYS = ['9d_matches', '9d_polls', '9d_notifications', '9d_notifs_cleared', '9d_feedbacks',
+    const BACKUP_KEYS = ['seasons', 'seasons_meta',
+        '9d_matches', '9d_polls', '9d_notifications', '9d_notifs_cleared', '9d_announcements', '9d_feedbacks',
         '9d_pending_edits', '9d_player_edits', '9d_users', '9d_user_links', '9d_maintenance'];
     let backupInProgress = false;
+
+    // Bütün veriyi okur: önce kök, kurallar izin vermezse anahtar anahtar
+    function collectBackupData() {
+        return db.ref('/').once('value')
+            .then(snap => ({ data: snap.val() || {}, failed: [], source: 'root' }))
+            .catch(() => Promise.allSettled(BACKUP_KEYS.map(k => db.ref(k).once('value'))).then(results => {
+                const data = {};
+                const failed = [];
+                results.forEach((r, i) => {
+                    if (r.status === 'fulfilled') {
+                        const v = r.value.val();
+                        if (v !== null) data[BACKUP_KEYS[i]] = v;
+                    } else {
+                        failed.push({ key: BACKUP_KEYS[i], error: (r.reason && (r.reason.code || r.reason.message)) || 'Bilinmeyen hata' });
+                    }
+                });
+                return { data, failed, source: 'keys' };
+            }));
+    }
+
+    // Veriyi tarih-saat damgalı, girintili .json dosyası olarak indirir; dosya adını döndürür
+    function saveBackupFile(data, prefix) {
+        const now = new Date();
+        const p = n => String(n).padStart(2, '0');
+        const fileName = (prefix || 'yedek') + '-' + now.getFullYear() + '-' + p(now.getMonth() + 1) + '-' + p(now.getDate()) +
+            '-' + p(now.getHours()) + p(now.getMinutes()) + '.json';
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        return fileName;
+    }
+
+    function backupSummaryRows(data) {
+        const count = v => toList(v).length;
+        const row = (label, n) => '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee"><span>' + label + '</span><strong>' + n + '</strong></div>';
+        const head = t => '<div style="margin-top:12px;font-weight:700;color:#1E90FF">' + esc(t) + '</div>';
+        let html = '';
+        const seasons = (data.seasons && typeof data.seasons === 'object') ? Object.keys(data.seasons).filter(k => !k.startsWith('_')).sort() : [];
+        const metaList = (data.seasons_meta && data.seasons_meta.list) || {};
+        seasons.forEach(sid => {
+            const s = data.seasons[sid] || {};
+            const info = metaList[sid];
+            html += head(info ? info.grade + '. Sınıf (' + sid + ')' : sid) +
+                row('Maç', count(s.matches)) + row('Anket', count(s.polls)) + row('Duyuru', count(s.notifications)) + row('Oyuncu', count(s.players));
+        });
+        if (data['9d_matches'] !== undefined || data['9d_notifications'] !== undefined || data['9d_polls'] !== undefined) {
+            html += head(seasons.length ? 'Eski yapı (9d_*)' : 'Veriler') +
+                row('Maç', count(data['9d_matches'])) + row('Anket', count(data['9d_polls'])) + row('Duyuru', count(data['9d_notifications']));
+        }
+        html += head('Ortak') + row('Kullanıcı', count(data['9d_users']));
+        return html;
+    }
+
+    function failedKeysHtml(failed) {
+        if (!failed || !failed.length) return '';
+        return '<div style="margin-top:12px;color:#e74c3c"><strong style="color:#e74c3c !important">Okunamayan anahtarlar:</strong><ul style="margin:6px 0 0 18px">' +
+            failed.map(f => '<li style="color:#e74c3c">' + esc(f.key) + ' — ' + esc(f.error) + '</li>').join('') + '</ul></div>';
+    }
 
     function downloadDatabaseBackup() {
         const user = auth.currentUser;
@@ -5706,61 +6154,624 @@
             body.innerHTML = '<div style="text-align:center;color:#aaa;padding:20px">Yedek alınıyor...</div>';
             document.getElementById('backup-modal').classList.add('show');
 
-            const finish = (data, failedKeys, source) => {
-                const now = new Date();
-                const p = n => String(n).padStart(2, '0');
-                const fileName = 'yedek-' + now.getFullYear() + '-' + p(now.getMonth() + 1) + '-' + p(now.getDate()) +
-                    '-' + p(now.getHours()) + p(now.getMinutes()) + '.json';
-                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = fileName;
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                setTimeout(() => URL.revokeObjectURL(url), 1000);
-
-                const count = v => (v && typeof v === 'object') ? Object.keys(v).length : 0;
-                const row = (label, n) => '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee"><span>' + label + '</span><strong>' + n + '</strong></div>';
-                let html = '<div style="font-size:0.85rem">' +
+            collectBackupData().then(({ data, failed, source }) => {
+                const fileName = saveBackupFile(data);
+                body.innerHTML = '<div style="font-size:0.85rem">' +
                     '<p style="margin-bottom:10px">&#9989; <strong>' + fileName + '</strong> indirildi.</p>' +
                     '<p style="margin-bottom:10px;color:#888;font-size:0.75rem">Okuma yöntemi: ' + (source === 'root' ? 'Kök (tüm veritabanı)' : 'Anahtar anahtar') + '</p>' +
-                    row('Maç', count(data['9d_matches'])) +
-                    row('Anket', count(data['9d_polls'])) +
-                    row('Duyuru', count(data['9d_notifications'])) +
-                    row('Kullanıcı', count(data['9d_users']));
-                if (failedKeys.length) {
-                    html += '<div style="margin-top:12px;color:#e74c3c"><strong style="color:#e74c3c !important">Okunamayan anahtarlar:</strong><ul style="margin:6px 0 0 18px">' +
-                        failedKeys.map(f => '<li style="color:#e74c3c">' + f.key + ' — ' + f.error + '</li>').join('') + '</ul></div>';
-                }
-                html += '</div>';
-                body.innerHTML = html;
-                backupInProgress = false;
-            };
+                    backupSummaryRows(data) + failedKeysHtml(failed) + '</div>';
+            }).finally(() => { backupInProgress = false; });
+        });
+    }
 
-            const readKeysOneByOne = () => {
-                Promise.allSettled(BACKUP_KEYS.map(k => db.ref(k).once('value'))).then(results => {
-                    const data = {};
-                    const failed = [];
-                    results.forEach((r, i) => {
-                        if (r.status === 'fulfilled') {
-                            const v = r.value.val();
-                            if (v !== null) data[BACKUP_KEYS[i]] = v;
-                        } else {
-                            failed.push({ key: BACKUP_KEYS[i], error: (r.reason && (r.reason.code || r.reason.message)) || 'Bilinmeyen hata' });
-                        }
-                    });
-                    finish(data, failed, 'keys');
-                });
-            };
+    // ===== SEZON YÖNETİMİ (admin) =====
+    function verifyAdmin() {
+        return new Promise(resolve => {
+            const u = auth.currentUser;
+            if (!u || !isControlMode()) return resolve(false);
+            getUserRole(u.uid, role => resolve(role === 'admin'));
+        });
+    }
+    function openSeasonAdminModal(title, html) {
+        document.getElementById('season-admin-title').textContent = title;
+        document.getElementById('season-admin-body').innerHTML = html;
+        document.getElementById('season-admin-modal').classList.add('show');
+    }
+    function closeSeasonAdminModal() {
+        document.getElementById('season-admin-modal').classList.remove('show');
+    }
+    document.getElementById('season-admin-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeSeasonAdminModal();
+    });
+    function seasonLog(html, color) {
+        const el = document.getElementById('season-admin-log');
+        if (!el) return;
+        el.insertAdjacentHTML('beforeend', '<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:0.82rem' + (color ? ';color:' + color : '') + '">' + html + '</div>');
+    }
+    const errText = e => esc((e && (e.code || e.message)) || 'Bilinmeyen hata');
 
-            db.ref('/').once('value').then(snap => {
-                finish(snap.val() || {}, [], 'root');
-            }).catch(() => {
-                readKeysOneByOne();
+    // ----- Sezon sistemine geçiş (tek seferlik, sadece KOPYALAR) -----
+    const MIGRATION_CUTOFF = '2026-09-01';
+    const MIGRATION_SEASONS = {
+        old: { id: '2025-26', name: '2025-26', grade: 9, label: '9/D', order: 1, startDate: '2025-09-01' },
+        new: { id: '2026-27', name: '2026-27', grade: 10, label: '10/D', order: 2, startDate: '2026-09-01' }
+    };
+    const MIGRATION_SOURCE_KEYS = ['9d_matches', '9d_notifications', '9d_announcements', '9d_notifs_cleared', '9d_pending_edits', '9d_player_edits', '9d_polls'];
+    const RULES_SNIPPET = '"seasons":      { ".read": "auth != null", ".write": "auth != null" },\n"seasons_meta": { ".read": "auth != null", ".write": "auth != null" }';
+    let migrationPlan = null;
+    let migrationBusy = false;
+
+    // Sezonlar ekranı, sezon sistemine geçilmeden önce: mevcut veri tek sezon ("9. Sınıf") olarak
+    // gösterilir. "10. Sınıf Sezonunu Ekle" butonu tek seferlik taşımayı başlatır.
+    function renderLegacySeasonsPanel() {
+        migrationPlan = null;
+        const old = MIGRATION_SEASONS.old, nw = MIGRATION_SEASONS.new;
+        openSeasonAdminModal('Sezonlar', `
+            <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:12px;line-height:1.5">
+                Yeni sezon eklenince kadro ve ayarlar en son sezondan kopyalanır ve yeni sezon güncel olur. Sadece en son sezon silinebilir veya sıfırlanabilir; 9. Sınıf hiçbir zaman silinemez.
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;border-left:4px solid #1E90FF">
+                <div style="flex:1;min-width:140px">
+                    <div style="font-weight:700;font-size:0.95rem;color:var(--text)">${old.grade}. Sınıf
+                        <span style="font-size:0.72rem;font-weight:500;color:var(--text-muted)">${old.id}</span>
+                        <span style="font-size:0.65rem;padding:2px 8px;border-radius:6px;background:#1E90FF;color:#fff;font-weight:700;margin-left:4px">Güncel</span>
+                    </div>
+                    <div id="legacy-season-counts" style="font-size:0.75rem;color:var(--text-muted);margin-top:2px">${legacyMatches.length} maç · ${players.length} oyuncu</div>
+                </div>
+            </div>
+            <div style="margin:12px 0 8px;padding:10px 12px;border-radius:8px;background:#fff3e0;color:#e67e22;font-size:0.78rem;line-height:1.5">
+                İlk sezon eklenirken mevcut veriler ayrılır: <strong>${MIGRATION_CUTOFF}</strong> öncesi maç, duyuru ve kayıtlar ${old.grade}. Sınıf'ta kalır, sonrası ${nw.grade}. Sınıf'a geçer. Kadro ve ayarlar iki sezona da kopyalanır. Önce otomatik yedek iner, yazmadan önce özet gösterilir ve onayınız istenir. Eski veriler silinmez. Öneri: Başlamadan önce Bakım Arası'nı başlatın.
+            </div>
+            <button id="migration-start-btn" onclick="startMigration()" class="save-match-btn">+ ${nw.grade}. Sınıf Sezonunu Ekle <span style="font-weight:400;font-size:0.8rem">(${nw.id})</span></button>
+            <div id="season-admin-log" style="margin-top:10px"></div>
+        `);
+        // Duyuru ve anket sayılarını göster (sadece okuma)
+        Promise.all([db.ref('9d_notifications').once('value'), db.ref('9d_polls').once('value')]).then(([n, p]) => {
+            const el = document.getElementById('legacy-season-counts');
+            if (el && legacyMode) el.textContent = legacyMatches.length + ' maç · ' + toList(n.val()).length + ' duyuru · ' + toList(p.val()).length + ' anket · ' + players.length + ' oyuncu';
+        }).catch(() => {});
+    }
+
+    async function testSeasonWriteAccess() {
+        const stamp = Date.now();
+        const paths = ['seasons/_yazma_testi', 'seasons_meta/_yazma_testi'];
+        let ok = true, error = '';
+        try {
+            for (const p of paths) {
+                await db.ref(p).set(stamp);
+                const v = (await db.ref(p).once('value')).val();
+                if (v !== stamp) { ok = false; error = 'Yazılan değer geri okunamadı (' + p + ')'; break; }
+            }
+        } catch (e) {
+            ok = false;
+            error = (e && (e.code || e.message)) || 'Bilinmeyen hata';
+        }
+        for (const p of paths) { try { await db.ref(p).remove(); } catch (e) {} }
+        return { ok, error };
+    }
+
+    function buildMigrationPlan(src, existing, meta) {
+        const OLD = MIGRATION_SEASONS.old.id, NEW = MIGRATION_SEASONS.new.id;
+        const seasonOf = d => (d && String(d).slice(0, 10) < MIGRATION_CUTOFF) ? OLD : NEW;
+        const ex = sid => existing[sid] || {};
+        const updates = {};
+        const emptyCounts = () => ({ matches: 0, notifications: 0, announcements: 0, pending_edits: 0, polls: 0 });
+        const counts = { [OLD]: emptyCounts(), [NEW]: emptyCounts() };
+        const undated = [];
+        let skipped = 0;
+
+        // Maçlar: maç tarihine göre; hedefte aynı ID varsa üzerine yazılmaz
+        const bySeason = { [OLD]: [], [NEW]: [] };
+        toList(src['9d_matches']).forEach(m => {
+            if (!m.date) undated.push('Maç ' + m.id);
+            bySeason[seasonOf(m.date)].push(m);
+        });
+        [OLD, NEW].forEach(sid => {
+            const current = toList(ex(sid).matches);
+            const ids = new Set(current.map(m => String(m.id)));
+            const add = bySeason[sid].filter(m => !ids.has(String(m.id)));
+            skipped += bySeason[sid].length - add.length;
+            counts[sid].matches = add.length;
+            if (add.length) {
+                updates['seasons/' + sid + '/matches'] = current.concat(add).sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0));
+            }
+        });
+
+        // Anahtarlı koleksiyonlar: kendi tarih alanlarına göre; aynı anahtar varsa atlanır
+        [['9d_notifications', 'notifications', 'date'], ['9d_announcements', 'announcements', 'date'],
+         ['9d_pending_edits', 'pending_edits', 'date'], ['9d_polls', 'polls', 'createdAt']].forEach(([srcKey, dst, dateField]) => {
+            const obj = src[srcKey];
+            if (!obj || typeof obj !== 'object') return;
+            Object.entries(obj).forEach(([k, v]) => {
+                if (!v) return;
+                if (!v[dateField]) undated.push(dst + '/' + k);
+                const sid = seasonOf(v[dateField]);
+                if ((ex(sid)[dst] || {})[k] !== undefined) { skipped++; return; }
+                updates['seasons/' + sid + '/' + dst + '/' + k] = v;
+                counts[sid][dst]++;
             });
         });
+
+        // Duyuru temizlenme zamanı: kendi tarihinin sezonuna
+        const nc = src['9d_notifs_cleared'];
+        let ncSeason = null;
+        if (nc) {
+            ncSeason = seasonOf(new Date(nc).toISOString());
+            if (ex(ncSeason).notifs_cleared === undefined) updates['seasons/' + ncSeason + '/notifs_cleared'] = nc;
+        }
+
+        // Kadro, ayarlar ve oyuncu düzenlemeleri: iki sezona da
+        const basePlayers = {};
+        defaultPlayers.forEach(p => {
+            basePlayers[p.id] = { id: p.id, name: p.name, positions: p.positions, primaryPos: p.primaryPos || p.positions[0], foot: p.foot || 'Sağ' };
+        });
+        const edits = src['9d_player_edits'];
+        const editEntries = edits ? Object.entries(edits).filter(([, v]) => v) : [];
+        [OLD, NEW].forEach(sid => {
+            const e = ex(sid);
+            if (!e.players) updates['seasons/' + sid + '/players'] = basePlayers;
+            if (!e.settings) updates['seasons/' + sid + '/settings'] = { playerRatings: { ...playerRatings }, fixedPositions: { ...fixedPositions } };
+            const exEdits = e.player_edits || {};
+            editEntries.forEach(([id, v]) => {
+                if (exEdits[id] === undefined) updates['seasons/' + sid + '/player_edits/' + id] = v;
+            });
+        });
+
+        // Sezon listesi
+        const list = (meta && meta.list) || {};
+        [MIGRATION_SEASONS.old, MIGRATION_SEASONS.new].forEach(s => {
+            if (!list[s.id]) {
+                updates['seasons_meta/list/' + s.id] = { name: s.name, grade: s.grade, label: s.label, order: s.order, startDate: s.startDate, createdAt: new Date().toISOString() };
+            }
+        });
+        if (!meta || !meta.current) updates['seasons_meta/current'] = NEW;
+        updates['seasons_meta/migration'] = { done: true, at: new Date().toISOString(), by: (auth.currentUser && auth.currentUser.email) || '', counts };
+
+        return { updates, counts, skipped, undated, editCount: editEntries.length, ncSeason, OLD, NEW };
+    }
+
+    async function startMigration() {
+        if (migrationBusy) return;
+        if (!(await verifyAdmin())) { notify('Bu işlem için yetkiniz yok!', true); return; }
+        migrationBusy = true;
+        const btn = document.getElementById('migration-start-btn');
+        if (btn) btn.style.display = 'none';
+        const RED = '#e74c3c', GREEN = '#2ecc71';
+        try {
+            // 0) Daha önce yapılmış mı?
+            let meta = null;
+            try { meta = (await db.ref('seasons_meta').once('value')).val(); } catch (e) { /* izin yoksa yazma testi yakalar */ }
+            if (meta && meta.migration && meta.migration.done) {
+                seasonLog('Taşıma daha önce yapılmış (' + esc(meta.migration.at || '') + '). İşlem durduruldu, hiçbir şey değiştirilmedi.', RED);
+                return;
+            }
+
+            // 1) Otomatik yedek
+            seasonLog('1/4 Yedek alınıyor...');
+            const backup = await collectBackupData();
+            const fileName = saveBackupFile(backup.data);
+            seasonLog('&#9989; Yedek indirildi: <strong>' + esc(fileName) + '</strong>', GREEN);
+            if (backup.failed.length) seasonLog('Yedekte okunamayan anahtarlar: ' + backup.failed.map(f => esc(f.key)).join(', '), RED);
+
+            // 2) Yazma izni testi
+            seasonLog('2/4 Yeni yollara yazma izni kontrol ediliyor...');
+            const test = await testSeasonWriteAccess();
+            if (!test.ok) {
+                seasonLog('&#10060; Veritabanı kuralları <code>seasons</code> / <code>seasons_meta</code> yollarına yazmaya izin vermiyor (' + esc(test.error) + '). <strong>Hiçbir şey değiştirilmedi.</strong>', RED);
+                seasonLog('Firebase kurallarına (Realtime Database → Rules) şu satırların eklenmesi gerekiyor. Bunu veritabanı sahibine iletin:' +
+                    '<pre style="margin-top:8px;padding:10px;background:#1a1a2e;color:#fff;border-radius:8px;font-size:0.75rem;white-space:pre-wrap;user-select:all">' + esc(RULES_SNIPPET) + '</pre>');
+                return;
+            }
+            seasonLog('&#9989; Yazma izni var.', GREEN);
+
+            // 3) Eski verileri oku
+            seasonLog('3/4 Eski veriler okunuyor...');
+            const res = await Promise.allSettled(MIGRATION_SOURCE_KEYS.map(k => db.ref(k).once('value')));
+            const src = {};
+            const readFail = [];
+            res.forEach((r, i) => {
+                if (r.status === 'fulfilled') src[MIGRATION_SOURCE_KEYS[i]] = r.value.val();
+                else readFail.push(MIGRATION_SOURCE_KEYS[i] + ' (' + errText(r.reason) + ')');
+            });
+            if (readFail.length) {
+                seasonLog('&#10060; Okunamayan anahtarlar: ' + readFail.map(esc).join(', ') + '. Hiçbir şey değiştirilmedi.', RED);
+                return;
+            }
+            const existing = (await db.ref('seasons').once('value')).val() || {};
+
+            // 4) Plan ve onay
+            migrationPlan = buildMigrationPlan(src, existing, meta);
+            const unsafe = Object.keys(migrationPlan.updates).filter(k => !k.startsWith('seasons/') && !k.startsWith('seasons_meta/'));
+            if (unsafe.length) {
+                seasonLog('&#10060; Güvenlik kontrolü başarısız (beklenmeyen yol: ' + unsafe.map(esc).join(', ') + '). Hiçbir şey değiştirilmedi.', RED);
+                migrationPlan = null;
+                return;
+            }
+            const { counts, OLD, NEW } = migrationPlan;
+            const row = (label, a, b) => '<tr><td style="padding:6px 8px">' + label + '</td><td style="padding:6px 8px;text-align:center"><strong>' + a + '</strong></td><td style="padding:6px 8px;text-align:center"><strong>' + b + '</strong></td></tr>';
+            let html = '4/4 Taşınacaklar:' +
+                '<table style="width:100%;margin-top:8px;border-collapse:collapse;font-size:0.82rem">' +
+                '<tr><th style="text-align:left;padding:6px 8px"></th><th style="padding:6px 8px">9. Sınıf (' + OLD + ')</th><th style="padding:6px 8px">10. Sınıf (' + NEW + ')</th></tr>' +
+                row('Maç', counts[OLD].matches, counts[NEW].matches) +
+                row('Duyuru', counts[OLD].notifications, counts[NEW].notifications) +
+                row('Duyuru (announcements)', counts[OLD].announcements, counts[NEW].announcements) +
+                row('Anket', counts[OLD].polls, counts[NEW].polls) +
+                row('Onay kaydı (pending_edits)', counts[OLD].pending_edits, counts[NEW].pending_edits) +
+                row('Oyuncu düzenlemesi', migrationPlan.editCount, migrationPlan.editCount) +
+                row('Kadro (oyuncu)', defaultPlayers.length, defaultPlayers.length) +
+                '</table>';
+            if (migrationPlan.ncSeason) html += '<div style="margin-top:6px">Duyuru temizlenme zamanı → ' + esc(migrationPlan.ncSeason) + '</div>';
+            if (migrationPlan.skipped) html += '<div style="margin-top:6px;color:#e67e22">Hedefte zaten olduğu için atlanan kayıt: ' + migrationPlan.skipped + '</div>';
+            if (migrationPlan.undated.length) html += '<div style="margin-top:6px;color:#e67e22">Tarihi olmayan, 10. sınıfa konan kayıtlar: ' + migrationPlan.undated.map(esc).join(', ') + '</div>';
+            html += '<div style="margin-top:6px;color:#888">Eski 9d_* anahtarları silinmez.</div>';
+            html += '<button id="migration-confirm-btn" onclick="confirmMigration()" class="save-match-btn" style="margin-top:12px">Onayla ve 10. Sınıf Sezonunu Ekle</button>';
+            seasonLog(html);
+        } catch (e) {
+            seasonLog('&#10060; Hata: ' + errText(e) + '. Hiçbir şey değiştirilmedi.', RED);
+        } finally {
+            migrationBusy = false;
+        }
+    }
+
+    async function confirmMigration() {
+        if (!migrationPlan || migrationBusy) return;
+        if (!(await verifyAdmin())) { notify('Bu işlem için yetkiniz yok!', true); return; }
+        migrationBusy = true;
+        const btn = document.getElementById('migration-confirm-btn');
+        if (btn) btn.style.display = 'none';
+        try {
+            // Tek bir update: ya hepsi yazılır ya hiçbiri
+            await db.ref().update(migrationPlan.updates);
+            seasonLog('&#9989; 10. Sınıf sezonu eklendi. Site yeni yapıya geçiyor. Diğer cihazlardaki kullanıcıların sayfayı yenilemesi önerilir.', '#2ecc71');
+            notify('10. Sınıf sezonu eklendi!');
+            // Sezon listesi görünümüne geç (veri dinleyicisi sezon moduna geçtikten sonra)
+            setTimeout(() => { if (!legacyMode && document.getElementById('season-admin-modal').classList.contains('show')) renderSeasonsPanel(); }, 1500);
+        } catch (e) {
+            seasonLog('&#10060; Yazma başarısız (' + errText(e) + '). İşlem bütün olarak yapıldığı için hiçbir şey değiştirilmedi.', '#e74c3c');
+        } finally {
+            migrationBusy = false;
+            migrationPlan = null;
+        }
+    }
+
+    // ----- Yedekten geri yükleme -----
+    let restoreData = null;
+    let restoreBusy = false;
+
+    function openRestoreModal() {
+        if (!isControlMode()) return;
+        restoreData = null;
+        openSeasonAdminModal('Yedekten Geri Yükle', `
+            <div style="font-size:0.85rem;line-height:1.6;margin-bottom:12px">
+                Bir yedek dosyası (.json) seçin. Seçtiğiniz anahtarlar dosyadaki halleriyle <strong>tamamen değiştirilir</strong>; dosyada olmayan anahtarlara dokunulmaz. Yüklemeden önce mevcut verinin otomatik yedeği indirilir.
+            </div>
+            <input type="file" accept=".json,application/json" onchange="onRestoreFileSelected(this)" class="season-form-input" style="margin-bottom:12px">
+            <div id="restore-details"></div>
+            <div id="season-admin-log"></div>
+        `);
+    }
+
+    function onRestoreFileSelected(input) {
+        const file = input.files && input.files[0];
+        const details = document.getElementById('restore-details');
+        restoreData = null;
+        if (!file) { details.innerHTML = ''; return; }
+        const reader = new FileReader();
+        reader.onload = () => {
+            let data;
+            try { data = JSON.parse(reader.result); } catch (e) {
+                details.innerHTML = '<p style="color:#e74c3c">Dosya okunamadı: geçerli bir JSON değil.</p>';
+                return;
+            }
+            if (!data || typeof data !== 'object' || Array.isArray(data)) {
+                details.innerHTML = '<p style="color:#e74c3c">Bu dosya beklenen yedek yapısında değil.</p>';
+                return;
+            }
+            const allKeys = Object.keys(data);
+            const keys = allKeys.filter(k => !/^10d_/.test(k) && !k.startsWith('_') && !/[.#$\[\]\/]/.test(k)).sort();
+            const skipped = allKeys.filter(k => /^10d_/.test(k));
+            if (!keys.length) { details.innerHTML = '<p style="color:#e74c3c">Dosyada geri yüklenecek anahtar yok.</p>'; return; }
+            restoreData = data;
+            const describe = v => (v && typeof v === 'object') ? toList(v).length + ' kayıt' : String(v);
+            details.innerHTML =
+                '<div class="season-form-label">Geri yüklenecek anahtarlar</div>' +
+                '<div style="display:flex;flex-direction:column;gap:4px;margin-bottom:10px;max-height:220px;overflow:auto">' +
+                keys.map(k => '<label style="display:flex;align-items:center;gap:8px;font-size:0.82rem;cursor:pointer"><input type="checkbox" name="restore-key" value="' + esc(k) + '" checked> <strong>' + esc(k) + '</strong> <span style="color:#888">(' + esc(describe(data[k])) + ')</span></label>').join('') +
+                '</div>' +
+                (skipped.length ? '<p style="font-size:0.75rem;color:#888;margin-bottom:8px">Atlanan (her zaman): ' + skipped.map(esc).join(', ') + '</p>' : '') +
+                '<p style="font-size:0.75rem;color:#e67e22;margin-bottom:10px">Dikkat: 9d_users seçiliyse kullanıcı rolleri de yedekteki haline döner.</p>' +
+                '<label class="season-form-label">Onaylamak için <strong>GERİ YÜKLE</strong> yazın</label>' +
+                '<input type="text" id="restore-confirm" class="season-form-input" placeholder="GERİ YÜKLE" style="margin-bottom:12px">' +
+                '<button id="restore-btn" onclick="restoreFromBackup()" class="save-match-btn" style="background:linear-gradient(135deg,#e74c3c,#c0392b)">Geri Yükle</button>';
+        };
+        reader.readAsText(file);
+    }
+
+    async function restoreFromBackup() {
+        if (!restoreData || restoreBusy) return;
+        if (!(await verifyAdmin())) { notify('Bu işlem için yetkiniz yok!', true); return; }
+        const keys = [...document.querySelectorAll('input[name="restore-key"]:checked')].map(c => c.value);
+        if (!keys.length) { notify('En az bir anahtar seçin!', true); return; }
+        if (document.getElementById('restore-confirm').value.trim() !== 'GERİ YÜKLE') { notify('Onay için GERİ YÜKLE yazın.', true); return; }
+        if (!confirm('Seçili ' + keys.length + ' anahtar yedekteki halleriyle değiştirilecek:\n' + keys.join(', ') + '\n\nDevam edilsin mi?')) return;
+        restoreBusy = true;
+        const btn = document.getElementById('restore-btn');
+        if (btn) btn.style.display = 'none';
+        try {
+            seasonLog('Mevcut verinin yedeği alınıyor...');
+            const backup = await collectBackupData();
+            const fileName = saveBackupFile(backup.data, 'geri-yukleme-oncesi-yedek');
+            seasonLog('&#9989; Yedek indirildi: <strong>' + esc(fileName) + '</strong>', '#2ecc71');
+            const results = await Promise.allSettled(keys.map(k => db.ref(k).set(restoreData[k])));
+            results.forEach((r, i) => {
+                if (r.status === 'fulfilled') seasonLog('&#9989; ' + esc(keys[i]) + ' geri yüklendi', '#2ecc71');
+                else seasonLog('&#10060; ' + esc(keys[i]) + ' yüklenemedi (' + errText(r.reason) + ')', '#e74c3c');
+            });
+            notify('Geri yükleme tamamlandı.');
+        } catch (e) {
+            seasonLog('&#10060; Hata: ' + errText(e), '#e74c3c');
+        } finally {
+            restoreBusy = false;
+        }
+    }
+
+    // ----- Sezonlar yönetim ekranı (admin) -----
+    // Sezon adları sınıftan otomatik: "9. Sınıf" → 2025-26, her sınıf bir yıl sonrası. Elle giriş yok.
+    const FIRST_GRADE = 9, LAST_GRADE = 12, FIRST_GRADE_YEAR = 2025;
+    function seasonYearForGrade(grade) {
+        const y = FIRST_GRADE_YEAR + (grade - FIRST_GRADE);
+        return y + '-' + String((y + 1) % 100).padStart(2, '0');
+    }
+    function seasonGrade(sid) { return parseInt((seasonInfo(sid) || {}).grade) || 0; }
+    function lastSeasonId() { const ids = getSeasonIds(); return ids.length ? ids[ids.length - 1] : null; }
+    function seasonCounts(sid) {
+        const s = allSeasons[sid] || {};
+        return {
+            matches: toList(s.matches).length,
+            notifications: toList(s.notifications).length,
+            polls: toList(s.polls).length,
+            players: toList(s.players).length
+        };
+    }
+    // Silme/sıfırlama kuralı: sadece en son sezon, 9. Sınıf asla (fonksiyon içinde de kontrol edilir)
+    function canModifySeason(sid) {
+        const ids = getSeasonIds();
+        if (!sid || !seasonInfo(sid)) return { ok: false, reason: 'Sezon bulunamadı.' };
+        if (seasonGrade(sid) === FIRST_GRADE || ids[0] === sid) return { ok: false, reason: '9. Sınıf sezonu silinemez ve sıfırlanamaz.' };
+        if (ids.length < 2) return { ok: false, reason: 'Tek sezon silinemez.' };
+        if (sid !== lastSeasonId()) return { ok: false, reason: 'Sadece en son sezon silinebilir veya sıfırlanabilir.' };
+        return { ok: true };
+    }
+
+    function openSeasonsPanel() {
+        if (!isControlMode()) return;
+        if (legacyMode) { renderLegacySeasonsPanel(); return; }
+        renderSeasonsPanel();
+    }
+
+    function renderSeasonsPanel() {
+        const ids = getSeasonIds();
+        const last = lastSeasonId();
+        const lastGrade = seasonGrade(last);
+        const nextGrade = lastGrade + 1;
+        const rows = ids.slice().reverse().map(sid => {
+            const c = seasonCounts(sid);
+            const isCurrent = sid === currentSeasonId;
+            const modifiable = canModifySeason(sid).ok;
+            return `
+                <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;flex-wrap:wrap${isCurrent ? ';border-left:4px solid #1E90FF' : ''}">
+                    <div style="flex:1;min-width:140px">
+                        <div style="font-weight:700;font-size:0.95rem;color:var(--text)">${seasonGrade(sid)}. Sınıf
+                            <span style="font-size:0.72rem;font-weight:500;color:var(--text-muted)">${esc(sid)}</span>
+                            ${isCurrent ? '<span style="font-size:0.65rem;padding:2px 8px;border-radius:6px;background:#1E90FF;color:#fff;font-weight:700;margin-left:4px">Güncel</span>' : ''}
+                        </div>
+                        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px">${c.matches} maç · ${c.notifications} duyuru · ${c.polls} anket · ${c.players} oyuncu</div>
+                    </div>
+                    ${modifiable ? `
+                        <button onclick="resetLastSeason('${sid}')" style="padding:6px 12px;border:2px solid #e67e22;border-radius:8px;background:transparent;color:#e67e22;font-size:0.75rem;font-weight:700;cursor:pointer">Sıfırla</button>
+                        <button onclick="deleteLastSeason('${sid}')" style="padding:6px 12px;border:none;border-radius:8px;background:#e74c3c;color:#fff;font-size:0.75rem;font-weight:700;cursor:pointer">Sil</button>
+                    ` : ''}
+                </div>`;
+        }).join('');
+        const addBtn = lastGrade >= LAST_GRADE
+            ? '<div style="font-size:0.8rem;color:var(--text-muted);text-align:center;padding:8px">12. Sınıf son sezondur, yeni sezon eklenemez.</div>'
+            : `<button onclick="addNextSeason()" class="save-match-btn">+ ${nextGrade}. Sınıf Sezonunu Ekle <span style="font-weight:400;font-size:0.8rem">(${seasonYearForGrade(nextGrade)})</span></button>`;
+        openSeasonAdminModal('Sezonlar', `
+            <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:12px;line-height:1.5">
+                Yeni sezon eklenince kadro ve ayarlar en son sezondan kopyalanır ve yeni sezon güncel olur. Sadece en son sezon silinebilir veya sıfırlanabilir; 9. Sınıf hiçbir zaman silinemez. Silme ve sıfırlamadan önce otomatik yedek indirilir.
+            </div>
+            ${rows}
+            <div style="margin-top:12px">${addBtn}</div>
+            <div id="season-admin-log" style="margin-top:10px"></div>
+        `);
+    }
+
+    let seasonOpBusy = false;
+
+    async function addNextSeason() {
+        if (legacyMode || seasonOpBusy) return;
+        if (!(await verifyAdmin())) { notify('Bu işlem için yetkiniz yok!', true); return; }
+        const prev = lastSeasonId();
+        const prevGrade = seasonGrade(prev);
+        if (!prev || !prevGrade) { notify('En son sezon bulunamadı.', true); return; }
+        if (prevGrade >= LAST_GRADE) { notify('12. Sınıf son sezondur, yeni sezon eklenemez.', true); return; }
+        const grade = prevGrade + 1;
+        const sid = seasonYearForGrade(grade);
+        if (seasonInfo(sid) || allSeasons[sid]) { notify(sid + ' sezonu zaten var.', true); return; }
+        if (!confirm(grade + '. Sınıf (' + sid + ') sezonu eklenecek ve güncel sezon olacak.\nKadro ve ayarlar ' + prevGrade + '. Sınıf sezonundan kopyalanır. Duyurular ve anketler boş başlar.\n\nDevam edilsin mi?')) return;
+
+        seasonOpBusy = true;
+        const playersObj = {};
+        seasonRoster(prev).forEach(p => {
+            playersObj[p.id] = { id: p.id, name: p.name, positions: p.positions, primaryPos: p.primaryPos || p.positions[0], foot: p.foot || 'Sağ' };
+        });
+        const prevSettings = seasonSettings(prev);
+        const settings = JSON.parse(JSON.stringify({
+            playerRatings: prevSettings.playerRatings || playerRatings,
+            fixedPositions: prevSettings.fixedPositions || fixedPositions
+        }));
+        const maxOrder = Math.max(0, ...getSeasonIds().map(id => (seasonInfo(id) || {}).order || 0));
+        const updates = {};
+        updates['seasons/' + sid + '/players'] = playersObj;
+        updates['seasons/' + sid + '/settings'] = settings;
+        updates['seasons_meta/list/' + sid] = { name: sid, grade, label: grade + '/D', order: maxOrder + 1, createdAt: new Date().toISOString() };
+        updates['seasons_meta/current'] = sid;
+        try {
+            await db.ref().update(updates);
+            if (viewSeasonId !== sid && seasonInfo(sid)) onSeasonSelect(sid);
+            notify(grade + '. Sınıf sezonu eklendi ve güncel sezon oldu.');
+            setTimeout(renderSeasonsPanel, 300);
+        } catch (e) {
+            notify('Sezon eklenemedi: ' + ((e && e.code) || 'hata'), true);
+        } finally {
+            seasonOpBusy = false;
+        }
+    }
+
+    // Silme/sıfırlama öncesi ortak adımlar: yetki + kural kontrolü, otomatik yedek, özetli onay
+    async function prepareSeasonOp(sid, actionText, summaryText) {
+        if (legacyMode || seasonOpBusy) return false;
+        if (!(await verifyAdmin())) { notify('Bu işlem için yetkiniz yok!', true); return false; }
+        const rule = canModifySeason(sid);
+        if (!rule.ok) { notify(rule.reason, true); return false; }
+        seasonOpBusy = true;
+        try {
+            seasonLog('Otomatik yedek alınıyor...');
+            const backup = await collectBackupData();
+            const fileName = saveBackupFile(backup.data);
+            seasonLog('&#9989; Yedek indirildi: <strong>' + esc(fileName) + '</strong>', '#2ecc71');
+            if (backup.failed.length) seasonLog('Yedekte okunamayan anahtarlar: ' + backup.failed.map(f => esc(f.key)).join(', '), '#e74c3c');
+            if (!confirm('Yedek indirildi: ' + fileName + '\n\n' + summaryText + '\n\n' + actionText + ' Emin misiniz?')) {
+                seasonLog('İşlem iptal edildi, hiçbir şey değiştirilmedi.');
+                seasonOpBusy = false;
+                return false;
+            }
+            // Onay penceresi açıkken durum değişmiş olabilir: kuralları tekrar kontrol et
+            const again = canModifySeason(sid);
+            if (!again.ok) { notify(again.reason, true); seasonOpBusy = false; return false; }
+            return true;
+        } catch (e) {
+            seasonLog('&#10060; Yedek alınamadı (' + errText(e) + '). İşlem yapılmadı.', '#e74c3c');
+            seasonOpBusy = false;
+            return false;
+        }
+    }
+
+    async function deleteLastSeason(sid) {
+        const c = seasonCounts(sid);
+        const name = seasonGrade(sid) + '. Sınıf';
+        const ids = getSeasonIds();
+        const prev = ids[ids.indexOf(sid) - 1];
+        const summary = name + ' (' + sid + '): ' + c.matches + ' maç, ' + c.notifications + ' duyuru, ' + c.polls + ' anket, ' + c.players + ' oyuncu ve bütün mevki kayıtları silinecek.\n' +
+            (prev ? seasonGrade(prev) + '. Sınıf güncel sezon olacak.' : '');
+        if (!(await prepareSeasonOp(sid, name + ' sezonu tamamen silinecek.', summary))) return;
+        try {
+            const updates = {};
+            updates['seasons/' + sid] = null;
+            updates['seasons_meta/list/' + sid] = null;
+            updates['seasons_meta/current'] = prev;
+            await db.ref().update(updates);
+            if (viewSeasonId === sid && seasonInfo(prev)) onSeasonSelect(prev);
+            seasonLog('&#9989; ' + name + ' sezonu silindi. Güncel sezon: ' + seasonGrade(prev) + '. Sınıf', '#2ecc71');
+            notify(name + ' sezonu silindi.');
+            setTimeout(renderSeasonsPanel, 300);
+        } catch (e) {
+            seasonLog('&#10060; Silinemedi (' + errText(e) + '). İşlem bütün olarak yapıldığı için hiçbir şey değiştirilmedi.', '#e74c3c');
+        } finally {
+            seasonOpBusy = false;
+        }
+    }
+
+    async function resetLastSeason(sid) {
+        const c = seasonCounts(sid);
+        const name = seasonGrade(sid) + '. Sınıf';
+        const summary = name + ' (' + sid + '): ' + c.matches + ' maç, ' + c.notifications + ' duyuru, ' + c.polls + ' anket silinecek.\nSezon ve oyuncu listesi (' + c.players + ' oyuncu) kalacak.';
+        if (!(await prepareSeasonOp(sid, name + ' sezonu sıfırlanacak.', summary))) return;
+        try {
+            const updates = {};
+            ['matches', 'notifications', 'announcements', 'polls', 'notifs_cleared'].forEach(k => { updates['seasons/' + sid + '/' + k] = null; });
+            await db.ref().update(updates);
+            seasonLog('&#9989; ' + name + ' sezonu sıfırlandı.', '#2ecc71');
+            notify(name + ' sezonu sıfırlandı.');
+            setTimeout(renderSeasonsPanel, 300);
+        } catch (e) {
+            seasonLog('&#10060; Sıfırlanamadı (' + errText(e) + '). Hiçbir şey değiştirilmedi.', '#e74c3c');
+        } finally {
+            seasonOpBusy = false;
+        }
+    }
+
+    // ----- Oyuncu ekleme (sadece görüntülenen sezona, kalıcı kadro üyesi) -----
+    const ALL_POSITIONS = ['SNT','SĞK','SLK','MOO','MO','MDO','STP','KL'];
+
+    function nextPlayerId() {
+        let max = 0;
+        defaultPlayers.forEach(p => { max = Math.max(max, p.id); });
+        Object.keys(allSeasons).forEach(sid => toList((allSeasons[sid] || {}).players).forEach(p => { max = Math.max(max, parseInt(p.id) || 0); }));
+        return max + 1;
+    }
+
+    function openAddPlayerModal() {
+        if (!isControlMode()) return;
+        if (legacyMode) { notify('Oyuncu eklemek için önce sezon sistemine geçin.', true); return; }
+        if (!guardSeasonWrite()) return;
+        const posChecks = ALL_POSITIONS.map(pos =>
+            '<label style="display:flex;align-items:center;gap:6px;padding:6px 10px;background:#f3e5f5;border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:600;color:#333">' +
+            '<input type="checkbox" name="add-pos" value="' + pos + '" onchange="updateAddPrimaryPos()" style="accent-color:#9b59b6;width:16px;height:16px"> ' + pos + '</label>'
+        ).join('');
+        openSeasonAdminModal('Oyuncu Ekle', `
+            <div style="font-size:0.85rem;line-height:1.6;margin-bottom:12px">
+                Oyuncu sadece <strong>${esc(seasonDisplayName(viewSeasonId))}</strong> sezonunun kadrosuna eklenir; diğer sezonlar etkilenmez. Tek maçlık misafirler için maç formundaki <strong>Misafir Ekle</strong> kullanılır.
+            </div>
+            <label class="season-form-label">Ad Soyad</label>
+            <input type="text" id="add-player-name" class="season-form-input" maxlength="50" style="margin-bottom:10px">
+            <label class="season-form-label">Mevkiler</label>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">${posChecks}</div>
+            <label class="season-form-label">Asıl Mevki</label>
+            <select id="add-player-primary" class="season-form-input" style="margin-bottom:10px"><option value="">—</option></select>
+            <label class="season-form-label">Kullanılan Ayak</label>
+            <select id="add-player-foot" class="season-form-input" style="margin-bottom:10px">
+                <option value="Sağ">Sağ</option><option value="Sol">Sol</option><option value="Her İkisi">Her İkisi</option>
+            </select>
+            <label class="season-form-label">Güç Puanı (gizli, sadece Kadro Kurucu kullanır)</label>
+            <input type="number" id="add-player-rating" class="season-form-input" min="1" max="10" step="0.5" value="6" style="margin-bottom:14px">
+            <button onclick="saveNewPlayer()" class="save-match-btn">Oyuncuyu Ekle</button>
+        `);
+    }
+
+    function updateAddPrimaryPos() {
+        const checked = sortPositions([...document.querySelectorAll('input[name="add-pos"]:checked')].map(c => c.value));
+        const sel = document.getElementById('add-player-primary');
+        const prev = sel.value;
+        sel.innerHTML = checked.length ? checked.map(pos => '<option value="' + pos + '"' + (pos === prev ? ' selected' : '') + '>' + pos + '</option>').join('') : '<option value="">—</option>';
+    }
+
+    async function saveNewPlayer() {
+        if (legacyMode || !isControlMode() || !guardSeasonWrite()) return;
+        if (!(await verifyAdmin())) { notify('Bu işlem için yetkiniz yok!', true); return; }
+        const rawName = sanitizeInput(document.getElementById('add-player-name').value, 50);
+        const name = rawName.split(' ').filter(Boolean).map(w => w.charAt(0).toLocaleUpperCase('tr') + w.slice(1).toLocaleLowerCase('tr')).join(' ');
+        const positions = sortPositions([...document.querySelectorAll('input[name="add-pos"]:checked')].map(c => c.value));
+        const primaryPos = document.getElementById('add-player-primary').value;
+        const foot = document.getElementById('add-player-foot').value;
+        const rating = parseFloat(document.getElementById('add-player-rating').value);
+        if (!name) { notify('Lütfen oyuncu adını girin!', true); return; }
+        if (positions.length === 0) { notify('En az bir mevki seçin!', true); return; }
+        if (!positions.includes(primaryPos)) { notify('Asıl mevki seçili mevkilerden biri olmalı!', true); return; }
+        if (isNaN(rating) || rating < 1 || rating > 10) { notify('Güç puanı 1 ile 10 arasında olmalı!', true); return; }
+        if (players.some(p => p.name.toLocaleLowerCase('tr') === name.toLocaleLowerCase('tr'))) { notify('Bu isimde bir oyuncu bu sezonda zaten var!', true); return; }
+        const id = nextPlayerId();
+        if (id >= 200) { notify('Oyuncu ID sınırına ulaşıldı (200 ve üstü misafirlere ayrılmış).', true); return; }
+        const updates = {};
+        updates[sPath('players/' + id)] = { id, name, positions, primaryPos, foot };
+        updates[sPath('settings/playerRatings/' + id)] = rating;
+        try {
+            await db.ref().update(updates);
+            closeSeasonAdminModal();
+            notify(name + ' kadroya eklendi (' + seasonShortName(viewSeasonId) + ')');
+        } catch (e) {
+            notify('Oyuncu eklenemedi: ' + ((e && e.code) || 'hata'), true);
+        }
     }
 
     function updateMaintenanceUI() {
@@ -5804,13 +6815,15 @@
 
     function createCustomNotification() {
         if (!isControlMode()) return;
+        // Duyurular her zaman güncel sezona yayınlanır
+        if (isPastSeasonView()) { notify('Duyurular sadece güncel sezonda yayınlanabilir.', true); return; }
         if (!rateLimit('customNotif', 3000)) { notify('Çok hızlı! Birkaç saniye bekleyin.', true); return; }
         const title = sanitizeInput(document.getElementById('custom-notif-title').value, 100);
         const text = sanitizeInput(document.getElementById('custom-notif-text').value, 500);
         if (!title) { notify('Lütfen duyuru başlığı yazın!', true); return; }
         if (!text) { notify('Lütfen duyuru metni yazın!', true); return; }
         const user = auth.currentUser;
-        db.ref('9d_notifications').push({
+        db.ref(cPath('notifications')).push({
             text: text,
             title: title,
             date: new Date().toISOString(),
@@ -5824,22 +6837,22 @@
     }
 
     function deleteSingleNotif(id) {
-        if (!isControlMode()) return;
-        db.ref('9d_notifications/' + id).remove().then(() => {
+        if (!isControlMode() || !guardSeasonWrite()) return;
+        db.ref(sPath('notifications/' + id)).remove().then(() => {
             renderDuyurular();
             updateNotifBadge();
         });
     }
 
     function clearAllNotifications() {
-        if (!isControlMode()) return;
-        if (!confirm('Tüm duyurular herkes için silinecek. Emin misiniz?')) return;
-        db.ref('9d_notifications').remove().then(() => {
+        if (!isControlMode() || !guardSeasonWrite()) return;
+        if (!confirm((isPastSeasonView() ? seasonDisplayName(viewSeasonId) + ' sezonunun tüm duyuruları' : 'Tüm duyurular') + ' herkes için silinecek. Emin misiniz?')) return;
+        db.ref(sPath('notifications')).remove().then(() => {
             // Tüm kullanıcıların okunma verisini sıfırla
             const user = auth.currentUser;
             if (user) localStorage.removeItem('9d_read_notifs_' + user.uid);
             // Firebase'e temizlenme zamanını kaydet (diğer kullanıcılar da sıfırlansın)
-            db.ref('9d_notifs_cleared').set(Date.now());
+            db.ref(sPath('notifs_cleared')).set(Date.now());
             notify('Tüm duyurular herkes için temizlendi!');
             renderDuyurular();
             updateNotifBadge();
@@ -5847,7 +6860,7 @@
     }
 
     function renderDuyurular() {
-        db.ref('9d_notifications').once('value', snap => {
+        db.ref(sPath('notifications')).once('value', snap => {
             const notifs = snap.val();
             const container = document.getElementById('duyurular-list');
             if (!notifs) {
@@ -5901,7 +6914,7 @@
                 const isAnket = n.text.includes('anket');
 
                 let approvalButtons = '';
-                if (isPendingEdit) {
+                if (isPendingEdit && !isPastSeasonView()) {
                     if (isAdminMode && isSuperAdmin) {
                         approvalButtons = '<div style="display:flex;gap:6px;margin-top:6px"><button onclick="event.stopPropagation();approveFromNotif(\'' + id + '\')" style="flex:1;padding:6px;background:#2ecc71;color:#fff;border:none;border-radius:6px;font-weight:600;font-size:0.7rem;cursor:pointer">Onayla</button><button onclick="event.stopPropagation();rejectFromNotif(\'' + id + '\')" style="flex:1;padding:6px;background:#e74c3c;color:#fff;border:none;border-radius:6px;font-weight:600;font-size:0.7rem;cursor:pointer">Reddet</button></div>';
                     } else if (currentUser && n.createdBy === currentEmail) {
@@ -5946,8 +6959,9 @@
     let notifInitialized = false;
     let lastNotifCount = 0;
 
-    db.ref('9d_notifications').on('value', (snap) => {
-        const notifs = snap.val();
+    // Güncel sezonun duyuruları değiştiğinde çağrılır (rozet sadece güncel sezonu sayar).
+    // Eski yapıda 9d_notifications dinleyicisinden, sezon modunda seasons dinleyicisinden gelir.
+    function onCurrentNotifsChanged(notifs) {
         const currentCount = notifs ? Object.keys(notifs).length : 0;
 
         if (notifInitialized && currentCount > lastNotifCount) {
@@ -5971,7 +6985,7 @@
         lastNotifCount = currentCount;
         if (!notifInitialized) notifInitialized = true;
         updateNotifBadge();
-    });
+    }
 
     // ===== USER MENU =====
     function toggleUserMenu() {
@@ -6272,7 +7286,7 @@
 
             db.ref('9d_feedbacks/' + key + '/replies').push(replyData).then(() => {
                 // Geri bildirim gönderene özel duyuru
-                db.ref('9d_notifications').push({
+                db.ref(cPath('notifications')).push({
                     text: 'Geri bildiriminize cevap verildi: "' + sanitizeInput(text, 200) + '"',
                     detail: 'Geri bildiriminiz: "' + sanitizeInput(fbText, 100) + '"',
                     date: dateNow,
@@ -6282,7 +7296,7 @@
                 });
 
                 // Cevap veren kontrolcüye özel duyuru
-                db.ref('9d_notifications').push({
+                db.ref(cPath('notifications')).push({
                     text: 'Geri bildirime cevap verdiniz: "' + sanitizeInput(text, 200) + '"',
                     detail: 'Geri bildirim (' + feedbackEmail + '): "' + sanitizeInput(fbText, 100) + '"',
                     date: dateNow,
@@ -6320,7 +7334,10 @@
     }
 
     // Init
+    updateClassLabels();   // yükleme/giriş ekranı için son bilinen sınıf etiketi
+    applyViewSeason();
     renderAll();
+    startDataListeners();  // sezon sistemi (seasons_meta) veya eski yapı (9d_*) dinleyicileri
 </script>
 
 </body>
